@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../../stylesheets/site.css">
+</head>
+<body>
+<%- include ../header.html %>
+
+<div class="container" id="main">
+    <div class="row">
+        <div>
+            <h1 class="page-header">List
+                <small>Users</small>
+            </h1>
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a> <span class="divider">/</span></li>
+                <li class="active">Users</li>
+            </ul>
+        </div>
+    </div>
+    <div>
+        <% if(data.length === 0) {  %>
+        <div class="alert alert-info">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Note!</strong> No Records Available.
+        </div>
+        <% } else { %>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>User name</th>
+					<th>Email</th>
+					<th>Is Admin</th>
+                    <th>Assign User Group</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(var i=1; i<= data.length; i++) {
+                    var s =  i-1;                    
+                %>
+                <tr>
+                    <td><%- parseInt(total.page+i)  %></td>
+                    <td><%- data[s]['username'] %></td>
+					<td><%- data[s]['email'] %></td>
+					<td><input type="checkbox" name="user" value=<%- data[s]['id'] %>></td>
+                    <td><select name="groupId" multiple>
+						  <option value="" selected>Select</option>
+						  <option value="volvo">Volvo</option>
+						  <option value="saab">Saab</option>
+						  <option value="mercedes">Mercedes</option>
+						  <option value="audi">Audi</option>
+						</select>
+					</td>                    
+                </tr>
+                 <% } %>
+            </tbody>
+        </table>
+        <% } %>
+        <div><%- total.pager %></div>
+        
+</div>
+</div>
+<script type="text/javascript" src="../../javascripts/jquery.js"></script>
+<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
+
+</body>
+</html>

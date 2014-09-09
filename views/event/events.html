@@ -1,0 +1,117 @@
+<!DOCTYPE HTML>
+<html>
+	
+<head>
+    <title><%= title %></title>
+
+    <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../../stylesheets/site.css">
+    <link rel="stylesheet" href="../../javascripts/codebase/dhtmlxscheduler.css" type="text/css">
+	<style type="text/css" media="screen">
+		select {
+			height: 20px;
+			width: 65px;
+		}
+		.dhx_cal_event_clear {
+			height:20px;
+			white-space: normal;
+		}
+		
+	</style>
+</head>
+<body onload="init();">
+<% if (logged) { %>
+		<%- include ../header.html %>
+<% } else {%>
+		<%- include ../header_outer.html %>
+<% } %>
+<div class="container" id="main">
+    <div class="row">
+        <div>
+            <h1 class="page-header">Calendar
+                <small>Events</small>
+            </h1> 
+            
+        </div>
+        <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:700px;'>
+		<div class="dhx_cal_navline">
+			<div class="dhx_cal_prev_button">&nbsp;</div>
+			<div class="dhx_cal_next_button">&nbsp;</div>
+			<div class="dhx_cal_today_button"></div>
+			<div class="dhx_cal_date"></div>
+			<div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
+			<div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>
+			<div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div>
+		</div>
+		<div class="dhx_cal_header">
+		</div>
+		<div class="dhx_cal_data">
+		</div>
+	</div>
+    </div>
+    
+        <!-- /.row -->
+</div>
+<script type="text/javascript" src="../javascripts/jquery.js"></script>
+<script type="text/javascript" src="../javascripts/bootstrap.min.js"></script>
+<script src="../../javascripts/codebase/dhtmlxscheduler.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../javascripts/codebase/ext/dhtmlxscheduler_readonly.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript" charset="utf-8">
+	
+	function init() {
+		$.getJSON( "/settings/eventTypes", function( data ) {
+		var event_types = [];
+		
+		$.each( data, function( key, val ) {
+			var item = {};			
+			item["key"] = val.event_type_id;
+			item["label"] = val.event_type;
+			event_types.push(item);
+		});
+		scheduler.config.details_on_dblclick = true;
+		
+		function block_readonly(id){
+			if (!id) return true;
+			return !this.getEvent(id).readonly;
+		}
+		scheduler.attachEvent("onBeforeDrag",block_readonly);
+		scheduler.attachEvent("onClick",block_readonly);
+		
+		scheduler.config.max_month_events = 2;
+		scheduler.attachEvent("onEventSave",function(id,ev){
+			if (!ev.text) {
+				alert("Text must not be empty");
+				return false;
+			}
+			
+			return true;
+		})
+		scheduler.config.full_day = true;
+		scheduler.locale.labels.section_text = 'Title';
+ 
+		scheduler.locale.labels.section_select = 'Event Type';
+ 
+		scheduler.config.lightbox.sections = [
+		    { name:"text", height:50, map_to:"text", type:"textarea", focus:true },
+		    { name:"select", height:40, map_to:"type", type:"select", options:event_types},
+		    { name:"time", height:72, type:"time", map_to:"auto"}
+		];
+		scheduler.config.xml_date="%Y-%m-%d %H:%i";
+		scheduler.init('scheduler_here',new Date(),"month");
+
+		scheduler.templates.xml_date = function(value){ return new Date(value); };
+		scheduler.load("/events/getEvent", "json");	
+
+		var dp = new dataProcessor("/events/event");
+		dp.init(scheduler);		
+		dp.setTransactionMode("POST", false);
+		});
+		
+	}
+		
+		
+</script>
+</body>
+</html>

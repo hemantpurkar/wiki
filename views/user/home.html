@@ -1,0 +1,54 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../stylesheets/site.css">
+</head>
+<body>
+<%- include ../header.html %>
+<div class="container" id="main">
+    <div class="row">
+        <div>
+            <h1 class="page-header">Welcome
+                <small><%= session_user.username %></small>
+            </h1>
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a> <span class="divider">/</span></li>
+                <li class="active">landing</li>
+            </ul>
+        </div>
+        <% if(data){ %>
+        <div class="col-lg-8">
+                <h1><%= data.wiki_title %>
+                </h1>
+                <p>Posted on <span><%= data.updated_date %></span></p>
+                <hr>
+                <p><%- data.wiki_content %></p>
+         </div>
+        <% } %>
+        <% if(wikiattchment.length > 0) {  %>
+        <table class="table table-hover">
+            <thead>
+                <tr>                    
+                    <th>Attachment(s)</th>
+                </tr>
+            </thead>
+            <tbody>   
+                <% for(var i=0; i< wikiattchment.length; i++) {
+                    var s =  i+1;                   
+                %>
+                <tr>
+                    <td><a href="/wiki/download/<%= wikiattchment[i]['document_name'] %>" title="Download Attachment"><%= wikiattchment[i]['original_name'] %></a></td>
+                </tr>
+                 <% } %>
+            </tbody>
+        </table>
+        <% } %> 
+    </div>
+</div>
+<script type="text/javascript" src="../javascripts/jquery.js"></script>
+<script type="text/javascript" src="../javascripts/bootstrap.min.js"></script>
+</body>
+</html>

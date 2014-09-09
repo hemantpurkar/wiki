@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../stylesheets/site.css">
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top navbar-inverse">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand"><%= title %></a>
+
+            <!-- Start of the nav bar content -->
+            <div class="nav-collapse"><!-- Other nav bar content -->
+
+                <!-- The drop down menu -->
+                <ul class="nav pull-right">                                      
+                    <li class="divider-vertical"></li>
+					<li><a href="/users/registration">Sign Up</a></li>
+                    <li class="divider-vertical"></li>
+                    <li class="dropdown">
+                        <a id="dropdown-toggle" class="dropdown-toggle" href="#" data-toggle="dropdown">Sign In <strong class="caret"></strong></a>
+                        <div id="dropdown-menu" class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                            <!-- Login form here -->
+                            <form action="/users/login" method="POST">
+                                <%- message_login %>
+                                <input class="input-large" name="username" type="text" id="username" placeholder="Username" oninvalid="setCustomValidity('Please enter a usename!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
+                                <input id="password" placeholder="Password" name="password" class="input-large"  oninvalid="setCustomValidity('Please enter a password!')" onchange="try{setCustomValidity('')}catch(e){}" required="" type="password">
+                                <button type="submit" class="btn btn-primary">Sign in</button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="main">
+
+  <div class="marketing">
+
+    <span class="title-text">SmarTek Confluence</span>
+	<h3>Welcome to the documentation home page!</h3>
+	 <hr class="soften">
+    <div class="row-fluid">
+      <div class="span4">
+        <h3>Collaboration</h3>
+        <p>Collaborating with offshore team on</p>
+        <ul>
+        	<li>Sprint schedule</li>
+        </ul>
+        <ul>
+        	<li>Team calendars</li>
+        </ul>
+        <ul>
+        	<li>Documentation</li>
+        </ul>     
+      </div>
+      <div class="span4">
+        <h3>Managers</h3>
+        <p>Create and publish</p>
+         <ul>
+        	<li>Sprint schedule</li>
+        </ul>
+        <ul>
+        	<li>Team calendars</li>
+        </ul>
+        <ul>
+        	<li>Documentation</li>
+        </ul>  
+         <ul>
+        	<li>Wiki pages across different teams</li>
+        </ul>
+      </div>
+      <div class="span4">
+        <h3>Developers</h3>
+        <ul>
+        	<li>Look after the sprint plan</li>
+        </ul>
+         <ul>
+        	<li>Shared documentation</li>
+        </ul>
+        <ul>
+        	<li>Wiki pages shared by manager </li>
+        </ul>          
+      </div>
+    </div>
+
+     </div>
+
+</div>
+<script type="text/javascript" src="../javascripts/jquery.js"></script>
+<script type="text/javascript" src="../javascripts/bootstrap.min.js"></script>
+<!--
+<script type="text/javascript" src="/js/app.js"></script>
+-->
+</body>
+</html>

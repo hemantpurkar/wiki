@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../../stylesheets/site.css">
+    <link rel="stylesheet" href="../../stylesheets/jquery.treeview.css">   	
+</head>
+<body>
+<%- include ../header.html %>
+<%- include ../left.html %>
+<div class="container content" id="main">
+    <div class="row">
+        <div>
+            <h1 class="page-header">List
+                <small>wiki</small>
+            </h1>
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a> <span class="divider">/</span></li>
+                <li class="active">Wiki</li>               
+                <li class="float-right"><a href="/wiki/add" title="Create wiki page">Create Wiki Page</a></li>                
+            </ul>
+        </div>
+    </div>
+
+    <div>
+        <% if(data.length === 0) {  %>
+        <div class="alert alert-info">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Note!</strong> No Records Available.
+        </div>
+        <% } else { %>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Sr no.</th>
+                    <th>Wiki Title</th>
+                    <% if(session_user) {
+                		if (session_user.role == 'admin'){
+                	 %>
+                    <th>Action</th>
+                    <% }} %>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(var i=1; i<= data.length; i++) {
+                    var s =  i-1;
+                    var edit_path = "/wiki/" + data[s]['wiki_id']+"/edit" ;
+                    var view_path = "/wiki/" + data[s]['wiki_id']+"/view" ;
+                    //var delete_path = "/wiki/" + data[s]['wiki_id']+"/delete" ;
+                    var export_path = "/wiki/" + data[s]['wiki_id']+"/pdf" ;
+                %>
+                <tr>
+                    <td><%= parseInt(pager.currPage+i)  %></td>
+                    <td><a href=<%= view_path %> title="View"><%= data[s]['wiki_title'] %></a></td>
+                    <td><a href=<%= edit_path %> title="Edit">Edit</a>
+                    <% if(session_user) {
+                		if (session_user.role == 'admin'){
+                	 %> | <a href=<%= export_path %> title="Export to PDF" target="_blank">Export</a> 
+                     <% }} %>
+                     </td> 
+                </tr>
+                 <% } %>
+            </tbody>
+        </table>
+        <% } %>
+       <div class="row">
+       		<div class="pagination"><%- pager.pager_view %></div>
+       	</div>
+        
+</div>
+</div>
+<script type="text/javascript" src="../../javascripts/jquery.js"></script>
+<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
+<script src="../..//javascripts/jquery.cookie.js" type="text/javascript"></script>
+<script src="../../javascripts/jquery.treeview.js" type="text/javascript"></script>
+<script type="text/javascript">
+	$(function() {
+		$("#navigation").treeview({
+		 collapsed: true,
+		 unique: true,
+		 persist: "location"
+		});
+	})	
+</script>
+</body>
+</html>

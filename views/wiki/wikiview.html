@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../../stylesheets/site.css">
+    <link rel="stylesheet" href="../../stylesheets/jquery.treeview.css">
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script> 
+    <script type="text/javascript" src="../../javascripts/jquery.js"></script>
+	<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../../javascripts/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../../javascripts/jquery.treeview.js"></script>
+	<script type="text/javascript">
+	$(function() {
+		$("#tree").treeview({
+		 collapsed: true,
+		 animated: "medium"
+		});
+	})	
+</script>
+</head>
+<body>
+<%- include ../header.html %>
+<%- include ../left.html %>
+
+<div class="container content" id="main">
+    <div class="row">
+        <div>
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a> <span class="divider">/</span></li>
+                <li><a href="/wiki/dashboard" >Wiki</a> <span class="divider">/</span></li>
+                <li class="active">View Wiki</li>
+                <li class="float-right">
+                	<%
+                		var edit_url = "/wiki/" + data.wiki_id +"/edit";
+                		var export_url = "/wiki/" + data.wiki_id +"/pdf";
+                	%>
+                	<a href="<%= edit_url%>" title="Edit wiki page">Edit</a>
+                	 <% if(session_user) {
+            		if (session_user.role == 'admin'){
+            		 %>  |
+                	<a href="<%= export_url%>" title="Export wiki page" target="_blank">Export</a> 
+                	<% }} %>
+                </li>    
+            </ul>
+        </div>
+        <div class="col-lg-8">
+                <h2><%= data.wiki_title %></h2>
+                <p>by <%= data.username %> on <span><%= data.updated_date %></span></p>
+                <hr>
+                <p><%- data.wiki_content %></p>
+         </div>        
+         <% if(wikiattchment.length > 0) {  %>
+        <table class="table table-hover">
+            <thead>
+                <tr>                    
+                    <th>Attachment(s) : </th>
+                </tr>
+            </thead>
+            <tbody>   
+                <% for(var i=0; i< wikiattchment.length; i++) {
+                    var s =  i+1;                   
+                %>
+                <tr>
+                    <td><a href="/wiki/download/<%= wikiattchment[i]['document_name'] %>" title="Download Attachment"><%= wikiattchment[i]['original_name'] %></a></td>
+                </tr>
+                 <% } %>
+            </tbody>
+        </table>
+        <% } %>
+    </div>    
+        <!-- /.row -->
+</div>
+</body>
+</html>

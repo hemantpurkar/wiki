@@ -1,0 +1,185 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../../stylesheets/site.css">
+ </head>
+<body>
+<%- include ../header.html %>
+<div class="container" id="main">
+<div class="row">
+        <div>
+            <h1 class="page-header"><%= page_message %>
+                <small>wiki page</small>
+            </h1>
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a> <span class="divider">/</span></li>
+                <li><a href="/wiki/dashboard">Wiki</a> <span class="divider">/</span></li>
+                <li class="active"><%= page_message %> Wiki</li>
+            </ul>
+        </div>
+    </div>
+    <div> <%- message %></div>
+             
+    <div id="regForm">
+        <form action="<%= action %>" method="POST" class="form-horizontal" enctype="multipart/form-data" id="frm_wiki">
+            <div class="control-group">
+                <label class="control-label" for="title_input">Title</label>
+
+                <div class="controls">
+                    <input type="text" id="title_input" name="title" value="<%= data.wiki_title ? data.wiki_title : '' %>"  oninvalid="setCustomValidity('Please enter a Title!')" onchange="try{setCustomValidity('')}catch(e){}" required="" placeholder="Enter Title">
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="content_input" class="control-label" for="content_input">Wiki Type</label>
+                <div class="controls">
+                    <select class="selectpicker" name="wiki_type">
+                        <% for(var i=0; i< wikitype.length; i++) { %>
+                            <option value="<%= wikitype[i].type_id %>" <% if(data.wiki_type  === wikitype[i].type_id) { %> selected <% } %>><%= wikitype[i].wiki_type %></option>
+                        <% } %>
+                    </select>
+                </div>
+            </div>
+            <div class="control-group">
+                <label for="content_input" class="control-label" for="content_input">Content</label>
+
+                <div class="controls">
+                    <textarea rows="10" cols="50" id="content_input" name="content"><%= data.wiki_content ? data.wiki_content : '' %></textarea>
+                    <input type="hidden" id="wiki_id" name="wiki_id" value="<%= data.wiki_id %>">    
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label" for="file_input">Attachment</label>
+
+                <div class="controls">
+                    <input type=file multiple id="file_input" name="file"   value="<%= data.wiki_file ? data.wiki_file : '' %>" oninvalid="setCustomValidity('Please Browse a File!')" onchange="try{setCustomValidity('')}catch(e){}"  >
+                <!--<span><img src="../../public/uploads/<%= data.wiki_file ? data.wiki_file : '' %>"  height="42" width="42"></span>-->
+                </div>
+            </div>
+        
+    	<div class="control-group">
+        <% if(wikiattchment.length === 0) {  %>
+        <div class="controls"><div class="alert alert-info">
+            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                <strong>Note!</strong> No Attachment Available.
+        </div>
+        </div>
+     	</div>         	
+        <% } else { %>
+        <div class="control-group">
+                <div class="controls">
+                    <table class="table-70">
+			            <tbody>   
+			                <% for(var i=0; i< wikiattchment.length; i++) {
+			                    var s =  i+1;			                   
+			                %>
+			                <tr>		
+			                    <td class="col-70"><a href="/wiki/download/<%= wikiattchment[i]['document_name'] %>" title="Download Attachment"><%= wikiattchment[i]['original_name'] %></a>                    	
+			                    </td>
+			                    <td class="col-30"><a href="/wiki/deleteAttachment/<%= wikiattchment[i]['document_id'] %>" id="delete"><img src="/images/delete.jpg" alt="Delete"/></a></td>
+			                </tr>
+			                 <% } %>
+			            </tbody>
+			        </table>
+                </div>
+        </div>        
+        <% } %>
+            <div class="control-group">
+            	<label for="content_input" class="control-label" for="content_input">Share With</label>
+                <div class="controls">
+                	<table class="user-selection">
+                		<tr>
+			                <% for(var i=0; i<groups.length; i++) {
+			                    if(i % 4 == 0){                 	                      
+			                %>	</tr>	<% } %>			                	                
+			                		<td>
+			                			<input type="checkbox" name="page_users[]" value="<%= groups[i]['group_id'] %>" 
+			                		<% 
+			                		for(var j=0; j<wiki_users.length;j++){    
+			                			if(groups[i]['group_id'] ==  wiki_users[j]['group_id']) {%> checked <%}
+			                		} %>
+			                		/> <%= groups[i]['group_name'] %>
+			                		</td>	                			                	
+			                <%	} %>
+	                	</tr>
+	                </table>
+                </div>
+            </div>
+            
+            <% if(session_user) {
+            		if (session_user.role == 'admin'){
+             %> 
+            <div class="control-group">
+            	<label for="content_input" class="control-label" for="content_input">Is it a Home Page ?</label>
+                <div class="controls">
+                    <input type="radio" name="home_page" value="1" <%- isChecked = (data.home_page == 1) ? 'checked' : ''%>>Yes 
+                    <input type="radio" name="home_page" value="0"                     
+                    <% if(data.home_page == 0 || data.home_page == null) { isNChecked = 'checked' } else { isNChecked = '' }%>                                       
+                   	<%- isNChecked %> > No
+                </div>
+            </div>
+           <% } }%>              
+            <div class="control-group">            
+                <div class="controls">
+                     <input type="submit" name="Submit" value="Save" class="btn">
+                     <input type="button" name="share" value="Save and Share" class="btn" id="share_btn">
+                     <input type="button" name="Cancel" value="Cancel" class="btn" id="cancel_btn">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="../../javascripts/jquery.js"></script>
+<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../javascripts/tinymce/tinymce.min.js"></script>
+<script type="text/javascript" src="../../javascripts/tiny_mce/tiny_mce.js"></script>
+<script type="text/javascript" >
+$("#delete").click(function() {
+    var r = confirm("Confirm delete?");
+    if (r == true) {
+        return true;
+    } else {
+        return false;
+    }   
+});
+
+$("#share_btn").click(function() {
+	$("#frm_wiki").attr('action', "/wiki/share"); 
+	$("#frm_wiki").submit();
+});
+
+$("#cancel_btn").click(function(e){
+    window.location = "/wiki/list/0";
+});
+</script>
+<script type="text/javascript">
+tinyMCE.init({
+        // General options
+        mode : "textareas",
+        theme : "advanced",
+        plugins : "autolink,lists,spellchecker,style,layer,table,save,advhr,advimage,advlink,iespell,inlinepopups,insertdatetime,preview,searchreplace,contextmenu,paste,directionality,fullscreen,noneditable,nonbreaking,xhtmlxtras,template",
+        //plugins : "autolink,lists,spellchecker,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview,media,searchreplace,print,contextmenu,paste,directionality,fullscreen,noneditable,visualchars,nonbreaking,xhtmlxtras,template",
+		
+        // Theme options
+        theme_advanced_buttons1 : "save,newdocument,|,bold,italic,underline,strikethrough,|,justifyleft,justifycenter,justifyright,justifyfull,|,styleselect,formatselect,fontselect,fontsizeselect",
+        theme_advanced_buttons2 : "cut,copy,paste,pastetext,pasteword,|,search,replace,|,bullist,numlist,|,outdent,indent,blockquote,|,undo,redo,|,link,unlink,anchor,image,cleanup,help,code,|,insertdate,inserttime,preview,|,forecolor,backcolor",
+        theme_advanced_buttons3 : "tablecontrols,|,hr,removeformat,visualaid,|,sub,sup,|,charmap,emotions,iespell,media,advhr,|,print,|,ltr,rtl,|,fullscreen",
+        theme_advanced_buttons4 : "insertlayer,moveforward,movebackward,absolute,|,styleprops,spellchecker,|,cite,abbr,acronym,del,ins,attribs,|,visualchars,nonbreaking,template,blockquote,pagebreak,|,insertfile,insertimage",
+        theme_advanced_toolbar_location : "top",
+        theme_advanced_toolbar_align : "left",
+        theme_advanced_statusbar_location : "bottom",
+        theme_advanced_resizing : true,
+
+        // Skin options
+        skin : "o2k7",
+        skin_variant : "silver",
+
+        
+});
+</script>
+</body>
+</html>

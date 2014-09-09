@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../../stylesheets/site.css">
+	<link rel="stylesheet" href="../../stylesheets/mcColorPicker.css" type="text/css" />
+	<script src="../../javascripts/mcColorPicker.js" type="text/javascript"></script>
+</head>
+<body>
+<%- include ../header.html %>
+<div class="container" id="main">
+<div class="row">
+        <div>
+            <h1 class="page-header"><%= page_message %>
+                <small>event type</small>
+            </h1>
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a> <span class="divider">/</span></li>
+                <li><a href="/settings/eventTypes/0">Event Type List</a> <span class="divider">/</span></li>
+                <li class="active">Event Type</li>
+            </ul>
+        </div>
+    </div>
+    <div> <%- message %></div>
+         
+    
+    <div id="regForm">
+
+        <form action="<%= action %>" method="POST" class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label" for="title_input">Event Title</label>
+
+                <div class="controls">
+                    <input type="text" id="title_input" name="title" value="<%= data.event_type ? data.event_type : '' %>" oninvalid="setCustomValidity('Please enter a Title!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
+                </div>
+            </div>
+	     <div class="control-group">
+                <label class="control-label" for="title_input">Event Color</label>
+
+                <div class="controls">
+                    <input type="text" id="color_input" name="color" value="<%= data.event_color ? data.event_color : '' %>" class="color" oninvalid="setCustomValidity('Please enter a Color!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <input type="hidden" id="title_input" name="event_type_id" value="<%= data.event_type_id %>">   
+                    <input type="submit" name="Submit" value="Save" class="btn">
+                    <input type="button" name="Cancel" value="Cancel" class="btn" id="cancel_btn">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="../../javascripts/jquery.js"></script>
+<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
+<script>
+$("#cancel_btn").click(function(e){
+    window.location = "/settings/eventTypes/0";
+});
+</script>
+</body>
+</html>

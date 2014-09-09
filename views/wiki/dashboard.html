@@ -1,0 +1,64 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../../stylesheets/site.css">
+    <link rel="stylesheet" href="../../stylesheets/jquery.treeview.css">
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js"></script> 
+    <script type="text/javascript" src="../../javascripts/jquery.js"></script>
+	<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
+	<script type="text/javascript" src="../../javascripts/jquery.cookie.js"></script>
+	<script type="text/javascript" src="../../javascripts/jquery.treeview.js"></script>
+	<script type="text/javascript">
+	$(function() {
+		$("#tree").treeview({
+		 collapsed: true,
+		 animated: "medium"
+		});
+	})	
+</script>  	
+</head>
+<body>
+<%- include ../header.html %>
+<%- include ../left.html %>
+<div class="container content" id="main">
+    <div class="row">
+        <div>
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a> <span class="divider">/</span></li>
+                <li><a href="/wiki/dashboard">Wiki</a> 
+                <li class="float-right">
+                	<a href="/wiki/add" title="Create wiki page">Create New</a>
+                </li>    
+            </ul>
+        </div>
+        <div class="col-lg-8">
+                <h2>Recently Updated </h2>
+         </div>        
+         <% 
+         if(data.length > 0) { 
+         	for(var i=1; i<= data.length; i++) {
+        			var s =  i-1;
+			 		var view_path = "/wiki/" + data[s]['wiki_id']+"/view" ; 
+          %>
+	        <table class="table table-hover">
+	                <tr>                    
+	                    <td> 
+	                    	<a href=<%= view_path %> title="View"><%= data[s]['wiki_title'] %></a> <br>
+	                    	On <span><%= data[s].updated_on %></span>
+	                    </td>
+	                </tr>
+	        </table>
+        <% }
+        } %>
+    </div>
+    
+        <!-- /.row -->
+</div>
+
+</script>
+</body>
+
+</html>

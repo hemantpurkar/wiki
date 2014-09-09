@@ -27,3 +27,4 @@ node_modules
 # Ignoring settings folder
 .settings
 .idea
+.project

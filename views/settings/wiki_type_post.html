@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title><%= title %></title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
+    <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
+    <link rel="stylesheet" href="../../stylesheets/site.css">
+</head>
+<body>
+<%- include ../header.html %>
+<div class="container" id="main">
+<div class="row">
+        <div>
+            <h1 class="page-header"><%= page_message %>
+                <small>wiki type</small>
+            </h1>
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a> <span class="divider">/</span></li>
+                <li><a href="/settings/wikiTypes/0">Wiki Type List</a> <span class="divider">/</span></li>
+                <li class="active">Wiki Type</li>
+            </ul>
+        </div>
+    </div>
+    <div> <%- message %></div>
+         
+    
+    <div id="regForm">
+
+        <form action="<%= action %>" method="POST" class="form-horizontal">
+            <div class="control-group">
+                <label class="control-label" for="title_input">Title</label>
+
+                <div class="controls">
+                    <input type="text" id="title_input" name="title" value="<%= data.wiki_type ? data.wiki_type : '' %>" oninvalid="setCustomValidity('Please enter a Title!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <input type="hidden" id="title_input" name="wiki_type_id" value="<%= data.type_id %>">   
+                    <input type="submit" name="Submit" value="Save" class="btn">
+                    <input type="button" name="Cancel" value="Cancel" class="btn" id="cancel_btn">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script type="text/javascript" src="../../javascripts/jquery.js"></script>
+<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
+<script>
+$("#cancel_btn").click(function(e){
+    window.location = "/settings/wikiTypes/0";
+});
+</script>
+</body>
+</html>
