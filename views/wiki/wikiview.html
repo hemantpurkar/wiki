@@ -14,7 +14,7 @@
 	<script type="text/javascript">
 	$(function() {
 		$("#tree").treeview({
-		 collapsed: true,
+		 collapsed: false,
 		 animated: "medium"
 		});
 	})	
@@ -47,7 +47,8 @@
         </div>
         <div class="col-lg-8">
                 <h2><%= data.wiki_title %></h2>
-                <p>by <%= data.username %> on <span><%= data.updated_date %></span></p>
+                <p><span class="blue_text"><%= data.username%></span> 
+	               <span class="small_text">On <%= data.updated_on %></span></p>
                 <hr>
                 <p><%- data.wiki_content %></p>
          </div>        

@@ -1,18 +1,20 @@
 <div class="left_col">
 	<div id="sidetree">
 	<div class="treeheader">&nbsp;</div>	
-		<ul id="tree" class="open">				
-			<li><strong>Pages</strong>
+		<ul id="tree" class="open">			
+			<% for(var i=0; i< wiki_type.length; i++) {	%>				
+			<li><strong><%= wiki_type[i].wiki_type%> </strong>
 			<ul>
-			 	<% for(var i=1; i<= wiki_list.length; i++) {
-			 		var s =  i-1;
-			 		var view_path = "/wiki/" + wiki_list[s]['wiki_id']+"/view" ; 
-			 	%>
-					<li><a href=<%= view_path %> title="View"><%= wiki_list[s]['wiki_title'] %></a></li>
-				<% } %>
+			 	<% for(var j=1; j<= wiki_list.length; j++) {
+				 		var s =  j-1;
+				 		if(wiki_type[i].type_id == wiki_list[s]['wiki_type']){
+				 			var view_path = "/wiki/" + wiki_list[s]['wiki_id']+"/view" ; %>
+							<li><a href="<%= view_path %>" title="View"><%= wiki_list[s]['wiki_title'] %></a></li>
+					<% 	}
+					} %>
 			</ul>
-			</li>
-			<li><strong>Blogs</strong>
+			</li>			
+			<% } %>
 		</ul>
 	</div>
 </div>

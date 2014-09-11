@@ -77,7 +77,7 @@ var addWikiPage = function(params, callback) {
 }
 
 var addWikiDocument = function(params, callback) {
-	var qry = 'INSERT INTO wiki_documents (document_name, original_name, mime_type, wiki_id, created_on, is_active) values (?,?,?,?,?,?)';
+	var qry = 'INSERT INTO wiki_documents (document_name, original_name, mime_type, wiki_id, created_on, is_active) VALUES (?,?,?,?,?,?)';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in addWikiDcoument query ", err);
@@ -89,7 +89,7 @@ var addWikiDocument = function(params, callback) {
 }
 
 var listWiki = function(params, callback) {
-	var qry = 'SELECT wiki_id, wiki_title FROM wiki where wiki_active=1 ORDER BY updated_date DESC LIMIT ? , ?';
+	var qry = 'SELECT wiki_id, wiki_title FROM wiki WHERE wiki_active=1 ORDER BY updated_date DESC LIMIT ? , ?';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in listWiki query ", err);
@@ -101,7 +101,7 @@ var listWiki = function(params, callback) {
 }
 
 var getAllWiki = function(callback) {
-	var qry = 'SELECT wiki_id, wiki_title FROM wiki where wiki_active=1 ORDER BY wiki_title ASC';
+	var qry = 'SELECT wiki_id, wiki_title, wiki_type FROM wiki WHERE wiki_active=1 ORDER BY wiki_title ASC';
 	connection.query(qry, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in getAllWiki query ", err);
@@ -113,7 +113,10 @@ var getAllWiki = function(callback) {
 }
 
 var getRecentWiki = function(callback) {
-	var qry = 'SELECT wiki_id, wiki_title, DATE_FORMAT( updated_date,  "%d %b %Y ,%h:%i %p" ) AS updated_on FROM wiki where wiki_active=1 ORDER BY updated_date DESC';
+	var qry = 'SELECT wiki_id, wiki_title, DATE_FORMAT(updated_date,  "%d %b %Y, %h:%i %p") AS updated_on, user.username '; 
+	qry += 'FROM wiki INNER JOIN user ON wiki.user_id = user.id ';
+	qry += 'WHERE wiki_active=1 ';
+	qry += 'ORDER BY updated_date DESC'; 
 	connection.query(qry, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in getRecentWiki query ", err);
@@ -126,7 +129,7 @@ var getRecentWiki = function(callback) {
 
 
 var viewWiki = function(params, callback) {
-	var qry = 'SELECT wiki_id, wiki_title, wiki_content, wiki_type, DATE_FORMAT(updated_date,"%d %b %Y ,%h:%i %p") AS updated_date, user.username  FROM wiki INNER JOIN user ON wiki.user_id=user.id WHERE wiki.wiki_id = ?';
+	var qry = 'SELECT wiki_id, wiki_title, wiki_content, wiki_type, DATE_FORMAT(updated_date,"%d %b %Y, %h:%i %p") AS updated_on, user.username  FROM wiki INNER JOIN user ON wiki.user_id=user.id WHERE wiki.wiki_id = ?';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in viewWiki query ", err);
@@ -162,7 +165,7 @@ var updateWikiType = function(params, callback) {
 }
 
 var createWikiType = function(params, callback) {
-	var qry = 'INSERT INTO wiki_type (wiki_type) values (?)';
+	var qry = 'INSERT INTO wiki_type (wiki_type) VALUES (?)';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in createWikiType query ", err);
@@ -186,7 +189,7 @@ var deleteWikiType = function(params, callback) {
 }
 
 var getWikiHomepage = function(params, callback) {		
-		var qry = 'SELECT wiki.wiki_id, wiki.wiki_title, wiki.wiki_content, wiki.wiki_type, DATE_FORMAT( updated_date,  "%d %b %Y ,%h:%i %p" ) AS updated_date';
+		var qry = 'SELECT wiki.wiki_id, wiki.wiki_title, wiki.wiki_content, wiki.wiki_type, DATE_FORMAT( updated_date,  "%d %b %Y, %h:%i %p" ) AS updated_date';
 		qry += ' FROM wiki AS wiki';
 		qry += ' LEFT JOIN wiki_users ON wiki.wiki_id = wiki_users.wiki_id';
 		qry += ' LEFT JOIN group_users gu ON gu.group_id = wiki_users.group_id AND gu.user_id = 1';

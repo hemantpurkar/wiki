@@ -29,21 +29,22 @@
 <div class="container" id="main">
     <div class="row">
         <div>
-            <h1 class="page-header">Calendar
-                <small>Events</small>
-            </h1> 
-            
-        </div>
+            <span class="page-header">
+	            <h1>Calendar <small>Events</small></h1> 
+	            <% var title_header = '<div class="dhx_cal_date"></div>' %>
+	            <a href="#" onClick='scheduler.exportToPDF();' class="export_link">Export to PDF</a>
+            </span>
+        </div>                
         <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:700px;'>
-		<div class="dhx_cal_navline">
+		<div class="dhx_cal_navline">			
 			<div class="dhx_cal_prev_button">&nbsp;</div>
 			<div class="dhx_cal_next_button">&nbsp;</div>
 			<div class="dhx_cal_today_button"></div>
-			<div class="dhx_cal_date"></div>
+			<div class="dhx_cal_date" id="dhx_cal_date_header"></div>
 			<div class="dhx_cal_tab" name="day_tab" style="right:204px;"></div>
 			<div class="dhx_cal_tab" name="week_tab" style="right:140px;"></div>
 			<div class="dhx_cal_tab" name="month_tab" style="right:76px;"></div>
-		</div>
+		</div>				
 		<div class="dhx_cal_header">
 		</div>
 		<div class="dhx_cal_data">
@@ -57,6 +58,12 @@
 <script type="text/javascript" src="../javascripts/bootstrap.min.js"></script>
 <script src="../../javascripts/codebase/dhtmlxscheduler.js" type="text/javascript" charset="utf-8"></script>
 <script src="../../javascripts/codebase/ext/dhtmlxscheduler_readonly.js" type="text/javascript" charset="utf-8"></script>
+<script src="../../javascripts/scheduler_api.js" type="text/javascript"></script>
+<script>
+    scheduler.config.xml_date="%Y-%m-%d %H:%i";
+    scheduler.init('scheduler_here',new Date(),"month");
+    scheduler.load("/events/getEvent", "json");
+</script>
 
 <script type="text/javascript" charset="utf-8">
 	
@@ -108,10 +115,7 @@
 		dp.init(scheduler);		
 		dp.setTransactionMode("POST", false);
 		});
-		
-	}
-		
-		
+	}			
 </script>
 </body>
 </html>

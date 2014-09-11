@@ -96,16 +96,41 @@ ul.columns {
 	padding: 10px; 
 }
 .left_col{
-	width:200px; 
+	/*width:200px; 
 	display:inline-block;
 	float:left;
 	padding:10px;
-	margin-top:50px
+	margin-top:50px*/
+	
+	width: 200px;
+	display: inline-block;
+	float: left;
+	padding: 10px;
+	margin-top: 50px;
+	border-right: 1px solid grey;
+	position: absolute;
+	bottom: 0px;
+	top: 0px;
+	overflow: auto;
 }
 .content {
 	float:left;
-	padding-left:50px;
+	margin-left:300px;
 	width:970px;
-	margin-top:50px;
-	border-left: thin solid gray;
+	margin-top:50px;	
+	position: absolute;
+}
+.no_bottom_margin{
+	margin-bottom: 0px; !important
+}
+.blue_text{
+	color : #005580;
+}
+.small_text{
+	font-size: 12px; !important
+}
+.export_link{
+	margin-left:1100px;
+	padding-bottom:5px;
+	font-size:14px;
 }

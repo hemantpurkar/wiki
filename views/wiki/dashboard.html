@@ -43,11 +43,12 @@
         			var s =  i-1;
 			 		var view_path = "/wiki/" + data[s]['wiki_id']+"/view" ; 
           %>
-	        <table class="table table-hover">
+	        <table class="table table-hover no_bottom_margin">
 	                <tr>                    
 	                    <td> 
 	                    	<a href=<%= view_path %> title="View"><%= data[s]['wiki_title'] %></a> <br>
-	                    	On <span><%= data[s].updated_on %></span>
+	                    	<span class="blue_text"><%= data[s].username%></span> 
+	                    	<span class="small_text">On <%= data[s].updated_on %></span>
 	                    </td>
 	                </tr>
 	        </table>

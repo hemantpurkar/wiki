@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var eventModel = require('../models/event');
+var userModel = require('../models/user');
+var waterfall = require('async-waterfall');
 var apptitle = 'Wiki';
 
 var logAndRespond = function logAndRespond(err,res,status){
@@ -89,16 +91,42 @@ router.post('/event', function(req, res) {
 
 router.get('/getEvent', function(req, res) {
 	if (req.session.loggedIn) {	
-		var params = [req.session.user.id];
-		eventModel.getEvent(params, function executeSql(sqlErr, rows) {
-			if (sqlErr) {
-				mode = "error";
-				logAndRespond(sqlErr, res);
-				return;
-			} else {
-				res.send(rows);
-			}
-		});	
+		waterfall([
+		    function(callback){       
+		    	userModel.getAdminUser(function executeSql(sqlErr1, rows1) {
+					if (sqlErr1) {
+						logAndRespond(sqlErr1, res);
+						callback(sqlErr1, '');
+					} else {	
+						callback(null, rows1);						
+					}
+				});
+		    },	
+		    function(rows1, callback){	
+		    	var users = [];
+		    	var admin_users = [];
+		    	users.push(req.session.user.id);
+		    	users.push(req.session.user.id); // Pushing same var. twice to check with Admin user in sql 
+		    	if(rows1.length > 0){
+		    		for(i=0;i<rows1.length;i++){
+		    			admin_users.push(rows1[i].id);
+		    		}
+		    	}
+		    	users.push(admin_users);
+		    	var params = users;
+				eventModel.getEvent(params, function executeSql(sqlErr2, rows2) {
+					if (sqlErr2) {
+						mode = "error";
+						logAndRespond(sqlErr2, res);
+						callback(sqlErr2, '');
+					} else {
+						res.send(rows2);
+					}
+				});			    												
+		    }
+		 ], function(err, result) {
+			// result now equals 'done'
+		});					
 	} else {
         res.redirect('/');
     }

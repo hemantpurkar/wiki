@@ -79,9 +79,22 @@ var addUser = function(params, callback) {
 	})
 }
 
+var getAdminUser = function(params, callback) {
+	var qry = 'SELECT id FROM user WHERE is_admin = 1';
+	connection.query(qry, params, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in getAdminUser query ", err);
+			callback(err);
+		} else {		
+			callback('', rows);
+		}
+	})
+}
+
 exports.getUser = getUser;
 exports.getUserList = getUserList;
 exports.getUserCount = getUserCount;
 exports.getAllUsers = getAllUsers;
 exports.checkUserExists = checkUserExists;
 exports.addUser = addUser;
+exports.getAdminUser = getAdminUser;

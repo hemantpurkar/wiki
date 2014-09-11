@@ -126,7 +126,7 @@
             <div class="control-group">            
                 <div class="controls">
                      <input type="submit" name="Submit" value="Save" class="btn">
-                     <input type="button" name="share" value="Save and Share" class="btn" id="share_btn">
+                     <input type="submit" name="share" value="Save and Share" class="btn" id="share_btn">
                      <input type="button" name="Cancel" value="Cancel" class="btn" id="cancel_btn">
                 </div>
             </div>
@@ -149,11 +149,10 @@ $("#delete").click(function() {
 
 $("#share_btn").click(function() {
 	$("#frm_wiki").attr('action', "/wiki/share"); 
-	$("#frm_wiki").submit();
 });
 
 $("#cancel_btn").click(function(e){
-    window.location = "/wiki/list/0";
+    window.location = "/wiki/dashboard";
 });
 </script>
 <script type="text/javascript">
