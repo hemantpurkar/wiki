@@ -7,6 +7,7 @@ var groupModel = require('../models/group');
 var groupUsersModel = require('../models/group_users');
 var waterfall = require('async-waterfall');
 var pagination = require('../lib/pagination');
+var log = require('../lib/logger');
 var apptitle = 'Wiki';
 
 //Create event type page
@@ -37,7 +38,8 @@ router.post('/saveEventType', function(req, res) {
 		var params = [title,color];
 		eventModel.createEventType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.redirect('/settings/eventTypes/0');
@@ -58,7 +60,8 @@ router.get('/:event_type_id/deleteEventType', function(req, res) {
 		var params = [type_id];
 		eventModel.deleteEventType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.redirect('/settings/eventTypes/0');
@@ -76,7 +79,8 @@ router.get("/eventTypes", function(req, res) {
 	if (req.session.loggedIn) {		
 		eventModel.getAllEventTypes(function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.send(rows);
@@ -95,7 +99,8 @@ router.get('/:event_id/editevent', function(req, res) {
 		var params = [eventId];
 		eventModel.getEventType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.statusCode = 201;
@@ -128,7 +133,8 @@ router.post('/update_eventType', function(req, res) {
 		var params = [title, color, type_id];
 		eventModel.updateEventType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.redirect('/settings/eventTypes/0');
@@ -168,7 +174,8 @@ router.post('/saveWikiType', function(req, res) {
 		var params = [title];
 		wikiModel.createWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.redirect('/settings/wikiTypes/0');
@@ -188,7 +195,8 @@ router.get('/:wikiTypeId/editWikiType', function(req, res) {
 		var params = [wikiTypeId];
 		wikiModel.getWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.statusCode = 201;
@@ -220,7 +228,8 @@ router.post('/update_wikiType', function(req, res) {
 		var params = [title, type_id];
 		wikiModel.updateWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.redirect('/settings/wikiTypes/0');
@@ -241,7 +250,8 @@ router.get('/:wikiTypeId/deleteWikiType', function(req, res) {
 		var params = [type_id];
 		wikiModel.deleteWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);	
 				return;
 			} else {
 				res.redirect('/settings/wikiTypes/0');
@@ -269,7 +279,8 @@ router.get("/wikiTypes/:page", function(req, res) {
 				
 				wikiModel.getWikiTypeCount(function executeSql(sqlErr, rows) {
 					if (sqlErr) {
-						logAndRespond(sqlErr, res);
+						//logAndRespond(sqlErr, res);
+						log.logger.error(sqlErr);	
 						return;
 					} else {
 						pager.count = rows[0].Count;
@@ -280,7 +291,8 @@ router.get("/wikiTypes/:page", function(req, res) {
 			function(pager, callback) {
 				pagination.paginate(pager, function(err, pager_obj, start){
 					if (err) {
-						logAndRespond(err, res);
+						//logAndRespond(err, res);
+						log.logger.error(err);	
 						return;
 					} else {					
 						callback(null, pager_obj, start);
@@ -292,7 +304,8 @@ router.get("/wikiTypes/:page", function(req, res) {
 				wikiModel.getWikiTypes(params,
 						function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								logAndRespond(sqlErr, res);
+								//logAndRespond(sqlErr, res);
+								log.logger.error(sqlErr);	
 								return;
 							} else {
 								res.statusCode = 201;
@@ -328,7 +341,8 @@ router.get("/eventTypes/:page", function(req, res) {
 				
 				eventModel.getEventTypeCount(function executeSql(sqlErr, rows) {
 					if (sqlErr) {
-						logAndRespond(sqlErr, res);
+						//logAndRespond(sqlErr, res);
+						log.logger.error(sqlErr);	
 						return;
 					} else {
 						pager.count = rows[0].Count;
@@ -339,7 +353,8 @@ router.get("/eventTypes/:page", function(req, res) {
 			function(pager, callback) {
 				pagination.paginate(pager, function(err, pager_obj, start){
 					if (err) {
-						logAndRespond(err, res);
+						//logAndRespond(err, res);
+						log.logger.error(err);	
 						return;
 					} else {					
 						callback(null, pager_obj, start);
@@ -351,7 +366,8 @@ router.get("/eventTypes/:page", function(req, res) {
 				eventModel.getEventTypes(params,
 						function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								logAndRespond(sqlErr, res);
+								//logAndRespond(sqlErr, res);
+								log.logger.error(sqlErr);	
 								return;
 							} else {
 								res.statusCode = 201;
@@ -414,7 +430,8 @@ router.get('/createUserGroup', function(req, res) {
 		});	*/
 		userModel.getAllUsers(function executeSql(sqlErr1, rows1) {
 			if (sqlErr1) {
-				logAndRespond(sqlErr1, res);
+				//logAndRespond(sqlErr1, res);
+				log.logger.error(sqlErr1);	
 				return;
 			} else {	
 				res.render('settings/group_create', {
@@ -456,7 +473,8 @@ router.post('/saveGroup', function(req, res) {
 	   			    	 var params = [group_name, group_email, req.session.user.id, currDate, currDate];				    	 
 	   			    	 groupModel.addGroup(params, function executeSql(sqlErr1,rows1) {	
 	   			    		if (sqlErr1) {
-	   								logAndRespond(sqlErr1, res);
+	   								//logAndRespond(sqlErr1, res);
+	   			    				log.logger.error(sqlErr1);	
 	   								return;
 	   						} else {
 	   								user_group_id = rows1.insertId;
@@ -469,7 +487,8 @@ router.post('/saveGroup', function(req, res) {
 	   			    	 var params = [group_name, group_email, currDate, user_group_id];				    	 
 	   			    	 groupModel.updateGroup(params, function executeSql(sqlErr1,rows1) {	
 	   			    		if (sqlErr1) {
-	   								logAndRespond(sqlErr1, res);
+	   								//logAndRespond(sqlErr1, res);
+	   			    				log.logger.error(sqlErr1);	
 	   								return;
 	   						} else {
 	   								callback(null, user_group_id);
@@ -482,7 +501,8 @@ router.post('/saveGroup', function(req, res) {
 	   				var params = [user_group_id];
 	   				groupUsersModel.deleteGroupUsers(params, function executeSql(sqlErr2,rows2) {					
 	   					if (sqlErr2) {
-	   						logAndRespond(sqlErr2, res);
+	   						//logAndRespond(sqlErr2, res);
+	   						log.logger.error(sqlErr2);	
 	   						return;
 	   					} 
 	   					else{
@@ -505,7 +525,8 @@ router.post('/saveGroup', function(req, res) {
 				    	 params.push(group_users[i], user_group_id);
 				    	 groupUsersModel.addGroupUsers(params, function executeSql(sqlErr3,rows3) {
 		   					if (sqlErr3) {
-		   						logAndRespond(sqlErr3, res);
+		   						//logAndRespond(sqlErr3, res);
+		   						log.logger.error(sqlErr3);	
 		   						return;
 		   					} else {
 		   						cnt++;
@@ -527,13 +548,15 @@ router.post('/saveGroup', function(req, res) {
 	   			    	// Is slected users and lead user not same..Insert lead as suser  
 	   			    	groupUsersModel.addGroupUsers(params, function executeSql(sqlErr4,rows4) {
 		   					if (sqlErr4) {
-		   						logAndRespond(sqlErr4, res);
+		   						//logAndRespond(sqlErr4, res);
+		   						log.logger.error(sqlErr4);	
 		   						return;
 		   					} else {
 		   						// Update user as lead
 		   						groupUsersModel.setGroupLead(params, function executeSql(sqlErr5,rows5) {					
 		   	   						if (sqlErr5) {
-		   	   							logAndRespond(sqlErr5, res);
+		   	   							//logAndRespond(sqlErr5, res);
+		   	   							log.logger.error(sqlErr5);	
 		   	   							return;
 		   	   						} 
 		   	   						else{
@@ -547,7 +570,8 @@ router.post('/saveGroup', function(req, res) {
 	   			    	// Update selected user as lead
 	   			    	groupUsersModel.setGroupLead(params, function executeSql(sqlErr4,rows4) {					
 	   						if (sqlErr4) {
-	   							logAndRespond(sqlErr4, res);
+	   							//logAndRespond(sqlErr4, res);
+	   							log.logger.error(sqlErr4);	
 	   							return;
 	   						} 
 	   						else{
@@ -570,7 +594,8 @@ router.get('/:group_id/deleteUserGroup', function(req, res) {
 		var params = [req.params.group_id];
 		groupModel.deleteGroup(params, function executeSql(sqlErr1, rows1) {
 			if (sqlErr1) {
-				logAndRespond(sqlErr1, res);
+				//logAndRespond(sqlErr1, res);
+				log.logger.error(sqlErr1);	
 				return;
 			} else {	
 				res.redirect('/settings/listGroups/0');						
@@ -596,7 +621,8 @@ router.get("/listGroups/:page", function(req, res) {
 				
 				groupModel.getGroupCount(function executeSql(sqlErr, rows) {
 					if (sqlErr) {
-						logAndRespond(sqlErr, res);
+						//logAndRespond(sqlErr, res);
+						log.logger.error(sqlErr);	
 						return;
 					} else {
 						pager.count = rows[0].Count;
@@ -607,7 +633,8 @@ router.get("/listGroups/:page", function(req, res) {
 			function(pager, callback) {
 				pagination.paginate(pager, function(err, pager_obj, start){
 					if (err) {
-						logAndRespond(err, res);
+						//logAndRespond(err, res);
+						log.logger.error(err);	
 						return;
 					} else {					
 						callback(null, pager_obj, start);
@@ -619,7 +646,8 @@ router.get("/listGroups/:page", function(req, res) {
 				groupModel.getGroupList(params,
 						function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								logAndRespond(sqlErr, res);
+								//logAndRespond(sqlErr, res);
+								log.logger.error(sqlErr);	
 								return;
 							} else {
 								res.statusCode = 201;
@@ -649,7 +677,8 @@ router.get('/:group_id/editUserGroup', function(req, res) {
 				var params = [groupId];
 				groupModel.getGroupInfo(params, function executeSql(sqlErr1, groupName) {
 					if (sqlErr1) {
-						logAndRespond(sqlErr1, res);
+						//logAndRespond(sqlErr1, res);
+						log.logger.error(sqlErr1);	
 						return;
 					} else {	
 						callback(null, groupName);						
@@ -659,7 +688,8 @@ router.get('/:group_id/editUserGroup', function(req, res) {
 		    function(groupName, callback){       
 		    	userModel.getAllUsers(function executeSql(sqlErr2, allUsers) {
 					if (sqlErr2) {
-						logAndRespond(sqlErr2, res);
+						//logAndRespond(sqlErr2, res);
+						log.logger.error(sqlErr2);	
 						return;
 					} else {	
 						callback(null, groupName, allUsers);						
@@ -670,12 +700,10 @@ router.get('/:group_id/editUserGroup', function(req, res) {
 		    	var params = [groupId];
 		    	groupUsersModel.getGroupUsers(params, function executeSql(sqlErr3, groupUsers) {
 					if (sqlErr3) {
-						logAndRespond(sqlErr3, res);
+						//logAndRespond(sqlErr3, res);
+						log.logger.error(sqlErr3);	
 						return;
 					} else {	
-						console.log("gname::",groupName);
-						console.log("allUsers::",allUsers);
-						console.log("groupUsers::",groupUsers);
 						res.statusCode = 201;
 						res.render('settings/group_create', {
 							data : groupName[0],
@@ -717,7 +745,8 @@ router.get("/listUsers/:page", function(req, res) {
 				
 				userModel.getUserCount(function executeSql(sqlErr, rows) {
 					if (sqlErr) {
-						logAndRespond(sqlErr, res);
+						//logAndRespond(sqlErr, res);
+						log.logger.error(sqlErr);	
 						return;
 					} else {
 						pager.count = rows[0].Count;
@@ -728,7 +757,8 @@ router.get("/listUsers/:page", function(req, res) {
 			function(pager, callback) {
 				pagination.paginate(pager, function(err, pager_obj, start){
 					if (err) {
-						logAndRespond(err, res);
+						//logAndRespond(err, res);
+						log.logger.error(err);	
 						return;
 					} else {					
 						callback(null, pager_obj, start);
@@ -740,7 +770,8 @@ router.get("/listUsers/:page", function(req, res) {
 				userModel.getUserList(params,
 						function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								logAndRespond(sqlErr, res);
+								//logAndRespond(sqlErr, res);
+								log.logger.error(sqlErr);	
 								return;
 							} else {
 								res.statusCode = 201;
@@ -761,13 +792,13 @@ router.get("/listUsers/:page", function(req, res) {
 
 });
 
-var logAndRespond = function logAndRespond(err, res, status) {
+/*var logAndRespond = function logAndRespond(err, res, status) {
 	console.error(err);
 	res.statusCode = ('undefined' === typeof status ? 500 : status);
 	res.send({
 		result : 'error',
 		err : err.code
 	});
-};
+};*/
 
 module.exports = router;

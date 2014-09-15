@@ -5,16 +5,19 @@ var usersModel = require('../models/user');
 var wikiModel = require('../models/wiki');
 var wikiDocumentsModel=require('../models/wiki_documents');
 var waterfall = require('async-waterfall');
+var log = require('../lib/logger');
+var encoder = require('../lib/encoder');
+var encode = encoder;
 var apptitle = 'Wiki';
 
-var logAndRespond = function logAndRespond(err,res,status){
+/*var logAndRespond = function logAndRespond(err,res,status){
     console.error(err);
     res.statusCode = ('undefined' === typeof status ? 500 : status);
     res.send({
         result: 'error',
         err:    err.code
     });
-};
+};*/
 
 router.post('/login', function(req, res) {
 	var data = req.body;
@@ -22,13 +25,26 @@ router.post('/login', function(req, res) {
     var password = data.password || '';
     
     if (username == '' || password == '') {
-            res.render('index', {
-                title:apptitle,
-                logged:req.session.loggedIn,
-                message_login:'<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><h4>Error!</h4>Wrong username or password</div>',
-				wikitype:''
-            });             
-            return;
+    	wikiModel.getWikiHomepage(function executeSql(sqlErr, rows) {			
+			if (sqlErr) {
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);
+				return;
+			} else {					
+				var wiki_content = '';				
+				wiki_content = encode.htmlDecode(rows[0].wiki_content);
+				res.render('index', {
+					wikitype:'',
+					wiki_content : wiki_content,
+					message_login:'<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><h4>Error!</h4>Wrong username or password</div>',
+					title : apptitle,
+					page_message : '',
+					logged:req.session.loggedIn,
+					session_user : '',		
+				});	
+				return
+			}
+		});         
     }
     else {
 		password = md5(req.body.password);
@@ -36,17 +52,31 @@ router.post('/login', function(req, res) {
 		var conditions = " username = '"+ username + "' AND password = '" + password + "'";
 		usersModel.getUser(conditions, function executeSql(err, rows){ 
 			if (err){ 
-				logAndRespond(err,res); 
+				//logAndRespond(err,res);
+				log.logger.error(err);	
 				return; 
 			}
 			else if (rows.length === 0){
-					res.render('index', {
-						title:apptitle,
-						logged:req.session.loggedIn,
-						message_login:'<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><h4>Error!</h4>Wrong username or password</div>',
-						wikitype:''
-						});                
-				   return;
+				wikiModel.getWikiHomepage(function executeSql(sqlErr, rows) {			
+					if (sqlErr) {
+						//logAndRespond(sqlErr, res);
+						log.logger.error(sqlErr);
+						return;
+					} else {					
+						var wiki_content = '';				
+						wiki_content = encode.htmlDecode(rows[0].wiki_content);
+						res.render('index', {
+							wikitype:'',
+							wiki_content : wiki_content,
+							message_login:'<div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button><h4>Error!</h4>Wrong username or password</div>',
+							title : apptitle,
+							page_message : '',
+							logged:req.session.loggedIn,
+							session_user : '',		
+						});	
+						return
+					}
+				}); 
 			}
 			else {
 				req.session.user = rows[0];
@@ -87,7 +117,8 @@ router.post('/registration', function(req, res) {
     var params = [username];
     usersModel.checkUserExists(params, function executeSql(err, rows){ 
        if (err){ 
-    	   logAndRespond(err,res); 
+    	   //logAndRespond(err,res);
+    	   log.logger.error(err);	
     	   return; 
        }
        if (rows.length > 0){         
@@ -103,7 +134,8 @@ router.post('/registration', function(req, res) {
     var params = [username, password, email];
     usersModel.addUser(params, function executeSql(err, rows){
 		if (err){ 
-			logAndRespond(err,res); 
+			//logAndRespond(err,res);
+			log.logger.error(err);	
 			return; 
 		}
 		res.statusCode = 201;

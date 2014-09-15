@@ -3,16 +3,17 @@ var router = express.Router();
 var eventModel = require('../models/event');
 var userModel = require('../models/user');
 var waterfall = require('async-waterfall');
+var log = require('../lib/logger');
 var apptitle = 'Wiki';
 
-var logAndRespond = function logAndRespond(err,res,status){
+/*var logAndRespond = function logAndRespond(err,res,status){
     console.error(err);
     res.statusCode = ('undefined' === typeof status ? 500 : status);
     res.send({
         result: 'error',
         err:    err.code
     });
-};
+};*/
 
 router.get('/calendar', function(req, res) {
 	if (req.session.loggedIn) {
@@ -44,7 +45,8 @@ router.post('/event', function(req, res) {
 			    eventModel.updateEvent(params, function executeSql(sqlErr, rows) {
 					if (sqlErr) {
 						mode = "error";
-						logAndRespond(sqlErr, res);
+						//logAndRespond(sqlErr, res);
+						log.logger.error(sqlErr);	
 						return;
 					} else {
 						tid = data._id;
@@ -59,7 +61,8 @@ router.post('/event', function(req, res) {
 			    eventModel.createEvent(params, function executeSql(sqlErr, rows) {
 					if (sqlErr) {
 						mode = "error";
-						logAndRespond(sqlErr, res);
+						//logAndRespond(sqlErr, res);
+						log.logger.error(sqlErr);	
 						return;
 					} else {
 						tid = data._id;
@@ -74,7 +77,8 @@ router.post('/event', function(req, res) {
 			    eventModel.deleteEvent(params, function executeSql(sqlErr, rows) {
 					if (sqlErr) {
 						mode = "error";
-						logAndRespond(sqlErr, res);
+						//logAndRespond(sqlErr, res);
+						log.logger.error(sqlErr);	
 						return;
 					} else {
 						tid = data._id;
@@ -95,7 +99,8 @@ router.get('/getEvent', function(req, res) {
 		    function(callback){       
 		    	userModel.getAdminUser(function executeSql(sqlErr1, rows1) {
 					if (sqlErr1) {
-						logAndRespond(sqlErr1, res);
+						//logAndRespond(sqlErr1, res);
+						log.logger.error(sqlErr1);	
 						callback(sqlErr1, '');
 					} else {	
 						callback(null, rows1);						
@@ -117,7 +122,8 @@ router.get('/getEvent', function(req, res) {
 				eventModel.getEvent(params, function executeSql(sqlErr2, rows2) {
 					if (sqlErr2) {
 						mode = "error";
-						logAndRespond(sqlErr2, res);
+						//logAndRespond(sqlErr2, res);
+						log.logger.error(sqlErr2);	
 						callback(sqlErr2, '');
 					} else {
 						res.send(rows2);

@@ -17,7 +17,8 @@
 		 collapsed: false,
 		 animated: "medium"
 		});
-	})	
+	})	  
+});
 </script>
 </head>
 <body>
@@ -32,16 +33,19 @@
                 <li><a href="/wiki/dashboard" >Wiki</a> <span class="divider">/</span></li>
                 <li class="active">View Wiki</li>
                 <li class="float-right">
-                	<%
+                	<% 
                 		var edit_url = "/wiki/" + data.wiki_id +"/edit";
                 		var export_url = "/wiki/" + data.wiki_id +"/pdf";
+						var delete_url = "/wiki/" + data.wiki_id +"/delete";
+						if(is_wiki_user.cnt == 1 || session_user.role == 'admin'){
                 	%>
                 	<a href="<%= edit_url%>" title="Edit wiki page">Edit</a>
-                	 <% if(session_user) {
-            		if (session_user.role == 'admin'){
+                	 <% if (session_user.role == 'admin'){
             		 %>  |
                 	<a href="<%= export_url%>" title="Export wiki page" target="_blank">Export</a> 
-                	<% }} %>
+						|
+                	<a href="<%= delete_url%>" title="Export wiki page" onClick="return confirm('Confirm delete?')">Delete</a> 
+                	<% }}	%>
                 </li>    
             </ul>
         </div>

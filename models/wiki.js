@@ -52,7 +52,7 @@ var getWikiTypeCount = function(params, callback) {
 }
 
 var getWikiPagesCount = function(params, callback) {
-	var qry = 'SELECT count(*) AS Count FROM wiki WHERE wiki_active = 1';
+	var qry = 'SELECT count(*) AS Count FROM wiki WHERE wiki_active = 1 AND home_page=0';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in getWikiPagesCount query ", err);
@@ -65,7 +65,7 @@ var getWikiPagesCount = function(params, callback) {
 
 
 var addWikiPage = function(params, callback) {
-	var qry = 'INSERT INTO wiki (wiki_title, wiki_content, updated_date, user_id, wiki_type) VALUES (?,?,?,?,?)';
+	var qry = 'INSERT INTO wiki (wiki_title, wiki_content, updated_date, user_id, wiki_type, home_page) VALUES (?,?,?,?,?,?)';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in addWikiPage query ", err);
@@ -89,7 +89,7 @@ var addWikiDocument = function(params, callback) {
 }
 
 var listWiki = function(params, callback) {
-	var qry = 'SELECT wiki_id, wiki_title FROM wiki WHERE wiki_active=1 ORDER BY updated_date DESC LIMIT ? , ?';
+	var qry = 'SELECT wiki_id, wiki_title FROM wiki WHERE wiki_active=1 AND home_page=0 ORDER BY updated_date DESC LIMIT ? , ?';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in listWiki query ", err);
@@ -101,7 +101,7 @@ var listWiki = function(params, callback) {
 }
 
 var getAllWiki = function(callback) {
-	var qry = 'SELECT wiki_id, wiki_title, wiki_type FROM wiki WHERE wiki_active=1 ORDER BY wiki_title ASC';
+	var qry = 'SELECT wiki_id, wiki_title, wiki_type FROM wiki WHERE wiki_active=1 AND home_page=0 ORDER BY wiki_title ASC';
 	connection.query(qry, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in getAllWiki query ", err);
@@ -112,11 +112,24 @@ var getAllWiki = function(callback) {
 	})
 }
 
+var getAllWiki_withHome = function(callback) {
+	var qry = 'SELECT wiki_id, wiki_title, wiki_type FROM wiki WHERE wiki_active=1 ORDER BY wiki_title ASC';
+	connection.query(qry, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in getAllWiki_withHome query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
+
 var getRecentWiki = function(callback) {
 	var qry = 'SELECT wiki_id, wiki_title, DATE_FORMAT(updated_date,  "%d %b %Y, %h:%i %p") AS updated_on, user.username '; 
 	qry += 'FROM wiki INNER JOIN user ON wiki.user_id = user.id ';
-	qry += 'WHERE wiki_active=1 ';
+	qry += 'WHERE wiki_active=1 AND home_page=0 ';
 	qry += 'ORDER BY updated_date DESC'; 
+	console.log("qry:::",qry);
 	connection.query(qry, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in getRecentWiki query ", err);
@@ -127,9 +140,23 @@ var getRecentWiki = function(callback) {
 	})
 }
 
+var getRecentWiki_withHome = function(callback) {
+	var qry = 'SELECT wiki_id, wiki_title, DATE_FORMAT(updated_date,  "%d %b %Y, %h:%i %p") AS updated_on, user.username '; 
+	qry += 'FROM wiki INNER JOIN user ON wiki.user_id = user.id ';
+	qry += 'WHERE wiki_active=1 ';
+	qry += 'ORDER BY updated_date DESC'; 
+	connection.query(qry, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in getRecentWiki_withHome query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
 
 var viewWiki = function(params, callback) {
-	var qry = 'SELECT wiki_id, wiki_title, wiki_content, wiki_type, DATE_FORMAT(updated_date,"%d %b %Y, %h:%i %p") AS updated_on, user.username  FROM wiki INNER JOIN user ON wiki.user_id=user.id WHERE wiki.wiki_id = ?';
+	var qry = 'SELECT wiki_id, wiki_title, wiki_content, wiki_type, home_page, DATE_FORMAT(updated_date,"%d %b %Y, %h:%i %p") AS updated_on, user.username  FROM wiki INNER JOIN user ON wiki.user_id=user.id WHERE wiki.wiki_id = ?';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in viewWiki query ", err);
@@ -141,7 +168,7 @@ var viewWiki = function(params, callback) {
 }
 
 var updateWikiPage = function(params, callback) {
-	var qry = 'UPDATE wiki SET wiki_title= ?, wiki_content= ?, updated_date= ?, user_id= ?, wiki_type= ? WHERE wiki_id= ?';
+	var qry = 'UPDATE wiki SET wiki_title= ?, wiki_content= ?, updated_date= ?, user_id= ?, wiki_type= ?, home_page = ? WHERE wiki_id= ?';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in updateWikiPage query ", err);
@@ -188,18 +215,35 @@ var deleteWikiType = function(params, callback) {
 	})
 }
 
-var getWikiHomepage = function(params, callback) {		
-		var qry = 'SELECT wiki.wiki_id, wiki.wiki_title, wiki.wiki_content, wiki.wiki_type, DATE_FORMAT( updated_date,  "%d %b %Y, %h:%i %p" ) AS updated_date';
+var deleteWikiPage = function(params, callback) {
+	var qry = 'UPDATE wiki SET wiki_active=0 WHERE wiki_id= ?';
+	connection.query(qry, params, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in deleteWikiPage query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
+
+var getWikiHomepage = function(callback) {		
+		/*var qry = 'SELECT wiki.wiki_id, wiki.wiki_title, wiki.wiki_content, wiki.wiki_type, DATE_FORMAT( updated_date,  "%d %b %Y, %h:%i %p" ) AS updated_date';
 		qry += ' FROM wiki AS wiki';
 		qry += ' LEFT JOIN wiki_users ON wiki.wiki_id = wiki_users.wiki_id';
 		qry += ' LEFT JOIN group_users gu ON gu.group_id = wiki_users.group_id AND gu.user_id = 1';
 		qry += ' WHERE wiki.home_page =1';	
 		qry += ' ORDER BY wiki.updated_date DESC';	
-		qry += ' LIMIT 0 , 1';	
+		qry += ' LIMIT 0 , 1';	*/
 		
-	connection.query(qry, params, function(err, rows, fields) {
+	var qry = 'SELECT wiki.wiki_id, wiki.wiki_title, wiki.wiki_content, wiki.wiki_type, DATE_FORMAT( updated_date,  "%d %b %Y, %h:%i %p" ) AS updated_date';
+		qry += ' FROM wiki AS wiki';
+		qry += ' WHERE wiki.home_page =1';	
+		qry += ' ORDER BY wiki.updated_date DESC';	
+		qry += ' LIMIT 0 , 1';	
+	connection.query(qry, function(err, rows, fields) {
 		if (err) {
-			console.log("Error in viewWiki query ", err);
+			console.log("Error in getWikiHomepage query ", err);
 			callback(err);
 		} else {
 			callback('', rows);
@@ -223,3 +267,6 @@ exports.getWikiPagesCount = getWikiPagesCount;
 exports.getWikiHomepage = getWikiHomepage;
 exports.getAllWiki = getAllWiki;
 exports.getRecentWiki = getRecentWiki;
+exports.getAllWiki_withHome = getAllWiki_withHome;
+exports.getRecentWiki_withHome = getRecentWiki_withHome;
+exports.deleteWikiPage = deleteWikiPage;

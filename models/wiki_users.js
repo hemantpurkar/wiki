@@ -42,6 +42,22 @@ var deleteWikiUsers = function(params, callback) {
 	})
 }
 
+var checkWikiUser = function(params, callback) {
+	var qry = 'SELECT COUNT(*) AS cnt FROM wiki_users wu '
+		qry += 'LEFT JOIN group_users gu ON wu.group_id = gu.group_id '
+		qry += 'WHERE wu.wiki_id = ? AND gu.user_id = ?';
+	
+	connection.query(qry, params, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in checkWikiUser query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
+
 exports.addWikiUsers = addWikiUsers;
 exports.getAllWikiUsers = getAllWikiUsers;
 exports.deleteWikiUsers = deleteWikiUsers;
+exports.checkWikiUser = checkWikiUser;

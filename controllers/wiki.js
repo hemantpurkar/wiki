@@ -12,6 +12,7 @@ var fs = require('fs-extra');
 var wkhtmltopdf = require('wkhtmltopdf');
 var mail = require('../lib/email.js');
 var transporter = mail.transporter;
+var log = require('../lib/logger');
 var apptitle = 'Wiki';
 
 // home
@@ -21,7 +22,8 @@ router.get('/add', function(req, res) {
 		    function(callback){       
 				wikiModel.getAllWikiTypes(function executeSql(sqlErr1, rows1) {
 					if (sqlErr1) {
-						logAndRespond(sqlErr1, res);
+						//logAndRespond(sqlErr1, res);
+						log.logger.error(sqlErr1);	
 						callback(sqlErr1, '');
 					} else {	
 						callback(null, rows1);						
@@ -31,7 +33,8 @@ router.get('/add', function(req, res) {
 		    function(rows1, callback){	
 		    	groupModel.getAllGroups(function executeSql(sqlErr2, rows2) {
 					if (sqlErr2) {
-						logAndRespond(sqlErr2, res);
+						//logAndRespond(sqlErr2, res);
+						log.logger.error(sqlErr2);	
 						callback(sqlErr2, '');
 					} else {	
 						res.statusCode = 201;
@@ -76,7 +79,8 @@ router.get('/list/:page', function(req, res) {
 						
 						wikiModel.getWikiPagesCount(function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								logAndRespond(sqlErr, res);
+								//logAndRespond(sqlErr, res);
+								log.logger.error(sqlErr);	
 								callback(sqlErr, '');
 							} else {
 								pager.count = rows[0].Count;
@@ -87,7 +91,8 @@ router.get('/list/:page', function(req, res) {
 					function(pager, callback) {
 						pagination.paginate(pager, function(err, pager_obj, start){
 							if (err) {
-								logAndRespond(err, res);
+								//logAndRespond(err, res);
+								log.logger.error(err);
 								callback(err, '');
 							} else {					
 								callback(null, pager_obj, start);
@@ -99,7 +104,8 @@ router.get('/list/:page', function(req, res) {
 						wikiModel.listWiki(params,
 								function executeSql(sqlErr, rows) {
 									if (sqlErr) {
-										logAndRespond(sqlErr, res);
+										//logAndRespond(sqlErr, res);
+										log.logger.error(sqlErr);
 										callback(sqlErr, '');
 									} else {
 										res.statusCode = 201;
@@ -131,7 +137,8 @@ router.get('/dashboard', function(req, res) {
 			function(callback){       
 				wikiModel.getAllWikiTypes(function executeSql(sqlErr1, rows1) {
 					if (sqlErr1) {
-						logAndRespond(sqlErr1, res);
+						//logAndRespond(sqlErr1, res);
+						log.logger.error(sqlErr1);
 						callback(sqlErr1, '');
 					} else {	
 						callback(null, rows1);						
@@ -139,9 +146,15 @@ router.get('/dashboard', function(req, res) {
 				});
 			},	       
 		    function(rows1, callback)   {
-		    	wikiModel.getAllWiki(function executeSql(sqlErr2, rows2) {
+				if(req.session.user.role == 'admin'){
+					method = wikiModel.getAllWiki_withHome;				
+				}else{
+					method = wikiModel.getAllWiki;
+				}
+				method(function executeSql(sqlErr2, rows2) {
 					if (sqlErr2) {
-						logAndRespond(sqlErr2, res);
+						//logAndRespond(sqlErr2, res);
+						log.logger.error(sqlErr2);
 						callback(sqlErr2, '');
 					} else {	
 						callback(null, rows1, rows2);						
@@ -149,9 +162,15 @@ router.get('/dashboard', function(req, res) {
 				});
 		    },    
 		    function(rows1, rows2, callback){
-		    	wikiModel.getRecentWiki(function executeSql(sqlErr3, rows3) {
+		    	if(req.session.user.role == 'admin'){
+					method = wikiModel.getRecentWiki_withHome;				
+				}else{
+					method = wikiModel.getRecentWiki;
+				}
+		    	method(function executeSql(sqlErr3, rows3) {
 					if (sqlErr3) {
-						logAndRespond(sqlErr3, res);
+						//logAndRespond(sqlErr3, res);
+						log.logger.error(sqlErr3);
 						callback(sqlErr3, '');
 					} else {	
 						res.statusCode = 201;
@@ -180,13 +199,13 @@ router.get('/dashboard', function(req, res) {
 //Wiki page list
 router.get('/:wiki_id/view', function(req, res) {
 	if (req.session.loggedIn) {
-		var wikiId = req.params.wiki_id;
-		var params = [wikiId];	
+		var wikiId = req.params.wiki_id;		
 		waterfall([
 			function(callback){       
 				wikiModel.getAllWikiTypes(function executeSql(sqlErr1, rows1) {
 					if (sqlErr1) {
-						logAndRespond(sqlErr1, res);
+						//logAndRespond(sqlErr1, res);
+						log.logger.error(sqlErr1);
 						callback(sqlErr1, '');
 					} else {	
 						callback(null, rows1);						
@@ -196,29 +215,45 @@ router.get('/:wiki_id/view', function(req, res) {
 		    function(rows1, callback)   {
 		    	wikiModel.getAllWiki(function executeSql(sqlErr2, rows2) {
 					if (sqlErr2) {
-						logAndRespond(sqlErr2, res);
+						//logAndRespond(sqlErr2, res);
+						log.logger.error(sqlErr2);
 						callback(sqlErr2, '');
 					} else {	
 						callback(null, rows1, rows2);						
 					}
 				});
 		    },    
-		    function(rows1, rows2, callback){       
+		    function(rows1, rows2, callback){  
+		    	var params = [wikiId];	
 		    	wikiModel.viewWiki(params, function executeSql(sqlErr3, rows3) {
 					if (sqlErr3) {
-						logAndRespond(sqlErr3, res);
+						//logAndRespond(sqlErr3, res);
+						log.logger.error(sqlErr3);
 						callback(sqlErr3, '');
 					} else {	
 						callback(null, rows1, rows2, rows3);						
 					}
 				});
-		    },	
-		    function(rows1, rows2, rows3, callback){
-			    var params = [wikiId];
-				wikiDocumentsModel.getWikiDocuments(params, function executeSql(sqlErr4, rows4) {
+		    },
+		    function(rows1, rows2, rows3, callback){    
+		    	var params = [wikiId, req.session.user.id];
+		    	wikiUsersModel.checkWikiUser(params, function executeSql(sqlErr4, rows4) {
 					if (sqlErr4) {
-						logAndRespond(sqlErr4, res);
+						//logAndRespond(sqlErr4, res);
+						log.logger.error(sqlErr4);
 						callback(sqlErr4, '');
+					} else {	
+						callback(null, rows1, rows2, rows3, rows4);						
+					}
+				});
+		    },
+		    function(rows1, rows2, rows3, rows4, callback){
+			    var params = [wikiId];
+				wikiDocumentsModel.getWikiDocuments(params, function executeSql(sqlErr5, rows5) {
+					if (sqlErr5) {
+						//logAndRespond(sqlErr4, res);
+						log.logger.error(sqlErr5);
+						callback(sqlErr5, '');
 					} else {	
 						res.statusCode = 201;
 						res.render('wiki/wikiview', {
@@ -227,7 +262,8 @@ router.get('/:wiki_id/view', function(req, res) {
 							wiki_type : rows1,
 							message : '',
 							title : apptitle,
-							wikiattchment : rows4,
+							is_wiki_user : rows4[0],
+							wikiattchment : rows5,
 							page_message : '',
 							session_user : req.session.user,
 							//action : '/wiki/:wiki_id/view',					
@@ -248,12 +284,26 @@ router.get('/:wiki_id/view', function(req, res) {
 router.get('/:wiki_id/edit', function(req, res) {
 	if (req.session.loggedIn) {
 		var wikiId = req.params.wiki_id;
+		var params = [wikiId, req.session.user.id];
+    	wikiUsersModel.checkWikiUser(params, function executeSql(sqlErr, result) {
+			if (sqlErr) {			
+				log.logger.error(sqlErr);
+				callback(sqlErr, '');
+				return;
+			} else {	
+				if(result[0].cnt == 0 && req.session.user.role != 'admin'){
+					log.logger.error("User '"+ req.session.user.id + "' tried to edit non-permitted wiki page !!!");
+					res.redirect('/wiki/dashboard');
+				}
+			}
+		});
 		waterfall([
 					function(callback) {	
 						var params = [wikiId];						
 						wikiModel.viewWiki(params, function executeSql(sqlErr1, rows1) {													
 							if (sqlErr1) {								
-								logAndRespond(sqlErr1, res);
+								//logAndRespond(sqlErr1, res);
+								log.logger.error(sqlErr1);
 								callback(sqlErr1, '');
 							} else {			
 								callback(null, rows1);
@@ -263,7 +313,8 @@ router.get('/:wiki_id/edit', function(req, res) {
 					function(rows1, callback) {
 						wikiModel.getAllWikiTypes(function executeSql(sqlErr2, rows2) {
 							if (sqlErr2) {
-								logAndRespond(sqlErr2, res);
+								//logAndRespond(sqlErr2, res);
+								log.logger.error(sqlErr2);
 								callback(sqlErr2, '');
 							} else {
 								callback(null, rows1, rows2);
@@ -273,7 +324,8 @@ router.get('/:wiki_id/edit', function(req, res) {
 					function(rows1, rows2, callback){
 						groupModel.getAllGroups(function executeSql(sqlErr3, rows3) {
 							if (sqlErr3) {
-								logAndRespond(sqlErr3, res);
+								//logAndRespond(sqlErr3, res);
+								log.logger.error(sqlErr3);
 								callback(sqlErr3, '');
 							} else {	
 								callback(null, rows1, rows2, rows3);
@@ -284,7 +336,8 @@ router.get('/:wiki_id/edit', function(req, res) {
 					    var params = [wikiId];
 						wikiDocumentsModel.getWikiDocuments(params, function executeSql(sqlErr4, rows4) {
 							if (sqlErr4) {
-								logAndRespond(sqlErr4, res);
+								//logAndRespond(sqlErr4, res);
+								log.logger.error(sqlErr4);
 								callback(sqlErr4, '');
 							} else {	
 								callback(null, rows1, rows2, rows3, rows4);
@@ -295,10 +348,11 @@ router.get('/:wiki_id/edit', function(req, res) {
 						var params = [wikiId];
 						wikiUsersModel.getAllWikiUsers(params, function executeSql(sqlErr5, rows5) {
 							if (sqlErr5) {
-								logAndRespond(sqlErr5, res);
+								//logAndRespond(sqlErr5, res);
+								log.logger.error(sqlErr5);
 								callback(sqlErr5, '');
 							} else {				
-								res.statusCode = 201;
+								res.statusCode = 201;								
 								res.render('wiki/wikipost', {
 									data : rows1[0],
 									message : '',
@@ -327,7 +381,28 @@ router.post('/update', function(req, res) {
 	if (req.session.loggedIn) {
 		updateWiki(req, res, function(err,result){
 			if (err) {
-				logAndRespond(err, res);
+				//logAndRespond(err, res);
+				log.logger.error(err);
+				return;
+			} 
+			else{
+				res.redirect('/wiki/dashboard');
+			}
+		});							        	    
+	} else {
+		res.redirect('/');
+	}
+});
+
+//Wiki page deletion
+router.get('/:wiki_id/delete', function(req, res) {	 
+	if (req.session.loggedIn) {
+		var wikiId = req.params.wiki_id;	
+		var params = [wikiId]; 
+		wikiModel.deleteWikiPage(params, function executeSql(sqlErr, rows) {
+			if (sqlErr) {
+				//logAndRespond(err, res);
+				log.logger.error(sqlErr);
 				return;
 			} 
 			else{
@@ -345,7 +420,8 @@ router.post("/create",function(req, res) {
 		//Function all to create wiki page...
 		createWiki(req, res, function(err,result){
 			if (err) {
-				logAndRespond(err, res);
+				//logAndRespond(err, res);
+				log.logger.error(err);
 				return;
 			} 
 			else{
@@ -378,7 +454,8 @@ router.post("/share",function(req, res) {
 					if(req.body.wiki_id != '' && req.body.wiki_id != 'undefined'){  // Edit Wiki
 						updateWiki(req, res, function(err,result){
 							if (err) {
-								logAndRespond(err, res);
+								//logAndRespond(err, res);
+								log.logger.error(err);
 								callback(err, '');
 							} 
 							else{			
@@ -389,7 +466,8 @@ router.post("/share",function(req, res) {
 					else{	// Create Wiki
 						createWiki(req, res, function(err,result){
 							if (err) {
-								logAndRespond(err, res);
+								//logAndRespond(err, res);
+								log.logger.error(err);
 								callback(err, '');
 								return;
 							} 
@@ -408,7 +486,8 @@ router.post("/share",function(req, res) {
 					var params = [wiki_id];
 					wikiDocumentsModel.getWikiDocuments(params, function(err, wiki_docs){
 						if (err) {
-							logAndRespond(err, res);
+							//logAndRespond(err, res);
+							log.logger.error(err);
 							callback(err, '');
 							return;
 						} 
@@ -421,7 +500,8 @@ router.post("/share",function(req, res) {
 					var params = [req.body.page_users];		
 					groupModel.getGroupInfo(params, function executeSql(sqlErr,groupInfo) {					
 						if (sqlErr) {
-							logAndRespond(sqlErr, res);
+							//logAndRespond(sqlErr, res);
+							log.logger.error(sqlErr);
 							callback(sqlErr, '');
 							return;
 						} 
@@ -456,7 +536,8 @@ router.post("/share",function(req, res) {
 									attachments : attachment_arr
 								},function(error, info) {
 									if (error) {								
-										logAndRespond(error, res);
+										//logAndRespond(error, res);
+										log.logger.error(error);
 										return;
 									}
 								});								
@@ -469,7 +550,8 @@ router.post("/share",function(req, res) {
 				     })
 			}], function(err, result) {
 				if(err){
-					logAndRespond(error, res);
+					//logAndRespond(error, res);
+					log.logger.error(error);
 					return;
 		 		}
 				else{
@@ -513,14 +595,16 @@ router.get('/deleteAttachment/:doc_id', function(req, res) {
 					var params = [documentId];
 					wikiDocumentsModel.getDocumentDetails(params, function executeSql(sqlErr1, rows1) {
 						if (sqlErr1) {
-							logAndRespond(sqlErr1, res);
+							//logAndRespond(sqlErr1, res);
+							log.logger.error(sqlErr1);
 							callback(sqlErr1, '');
 						} else {		
 							var documentName = rows1[0].document_name;
 							var filePath =  __dirname.replace("\controllers", "") + '/public/documents/' + documentName;			
 							fs.unlink(filePath, function(err, result) {
 								if (err) {
-									logAndRespond(err, res);
+									//logAndRespond(err, res);
+									log.logger.error(err);
 									callback(err, '');
 								}
 								else{
@@ -535,7 +619,8 @@ router.get('/deleteAttachment/:doc_id', function(req, res) {
 					var params = [documentId, rows1[0].wiki_id];
 					wikiDocumentsModel.deleteWikiDocument(params,function executeSql(sqlErr2,rows2) {
 						if (sqlErr2) {
-							logAndRespond(sqlErr2,res);
+							//logAndRespond(sqlErr2,res);
+							log.logger.error(sqlErr2);
 							callback(sqlErr2, '');
 						} else {
 							callback(null, 'done');
@@ -552,18 +637,19 @@ router.get('/deleteAttachment/:doc_id', function(req, res) {
 
 //Wiki page export
 router.get('/:wiki_id/pdf', function(req, res) {
-	if (req.session.loggedIn) { 
+	if (req.session.loggedIn && req.session.user.role == 'admin') { 
 		var wikiId = req.params.wiki_id;
 		var params = [wikiId];
 		wikiModel.viewWiki(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				logAndRespond(sqlErr, res);
+				//logAndRespond(sqlErr, res);
+				log.logger.error(sqlErr);
 				return;
 			} else {
 				res.statusCode = 201;				
 				var title = rows[0].wiki_title;
 				var posted= 'by '+rows[0].username;
-				var updated = 'Posted on '+rows[0].updated_date;
+				var updated = 'On '+rows[0].updated_on;
 				var content = rows[0].wiki_content;				
 				wkhtmltopdf.command = 'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe';
 				wkhtmltopdf('<h1>'+title+'</h1><p>'+posted+'</p><p>'+updated+'</p><p>'+content+'</p>', { pageSize: 'letter' }).pipe(res);
@@ -577,14 +663,14 @@ router.get('/:wiki_id/pdf', function(req, res) {
 
 module.exports = router;
 
-var logAndRespond = function logAndRespond(err, res, status) {
+/*var logAndRespond = function logAndRespond(err, res, status) {
 	console.error(err);
 	res.statusCode = ('undefined' === typeof status ? 500 : status);
 	res.send({
 		result : 'error',
 		err : err.code
 	});
-};
+};*/
 
 function createWiki(req, res, cb) {
 	var data = req.body;
@@ -594,7 +680,7 @@ function createWiki(req, res, cb) {
 		var wiki_type = data.wiki_type || '';
 		var file = data.file || '';
 		var page_users = data.page_users || '';
-		//var home_page = data.home_page || '';
+		var home_page = data.home_page || 0;
 		var wikiattchment = '';
 		
 		var ts = String(Math.round(new Date().getTime() / 1000));			
@@ -628,18 +714,20 @@ function createWiki(req, res, cb) {
 						wikiModel.getAllWikiTypes(function executeSql(sqlErr1, rows1) {
 							currDate = new Date();
 							if (sqlErr1) {
-								logAndRespond(sqlErr1, res);
+								//logAndRespond(sqlErr1, res);
+								log.logger.error(sqlErr1);
 								callback(sqlErr1, '');
 							} else {									
 								callback(null, rows1);
 							}
 						});	
 					},	
-					function(rows1, callback) {
-						var params = [title, content, currDate, req.session.user.id, wiki_type];
+					function(rows1, callback) {						
+						var params = [title, content, currDate, req.session.user.id, wiki_type, home_page];
 						wikiModel.addWikiPage(params, function executeSql(sqlErr2, rows2) {
 							if (sqlErr2) {
-								logAndRespond(sqlErr2,res);
+								//logAndRespond(sqlErr2,res);
+								log.logger.error(sqlErr2);
 								callback(sqlErr2, '');
 							} else {
 								callback(null, rows1, rows2);
@@ -653,7 +741,8 @@ function createWiki(req, res, cb) {
 							var params = [fName, original_name, fType, rows2.insertId, currDate, 1];
 							wikiModel.addWikiDocument(params,function executeSql(sqlErr3,rows3) {
 								if (sqlErr3) {
-									logAndRespond(sqlErr3,res);
+									//logAndRespond(sqlErr3,res);
+									log.logger.error(sqlErr3);
 									callback(sqlErr3, '');
 								} else {
 									callback(null, rows1, rows2, rows3);
@@ -668,7 +757,8 @@ function createWiki(req, res, cb) {
 						//Fetch all users
 						groupModel.getAllGroups(function executeSql(sqlErr4, rows4) {
 							if (sqlErr4) {
-								logAndRespond(sqlErr4, res);
+								//logAndRespond(sqlErr4, res);
+								log.logger.error(sqlErr4);
 								callback(sqlErr4, '');
 							} else {	
 								callback(null, rows1, rows2, rows3, rows4);
@@ -686,7 +776,8 @@ function createWiki(req, res, cb) {
 						    	 
 						    	 wikiUsersModel.addWikiUsers(params, function executeSql(sqlErr5,rows5) {					
 									if (sqlErr5) {
-										logAndRespond(sqlErr5, res);
+										//logAndRespond(sqlErr5, res);
+										log.logger.error(sqlErr5);
 										callback(sqlErr5, '');									
 									} 
 									else{																			
@@ -723,7 +814,7 @@ function updateWiki(req, res, cb) {
 	    var wiki_id  = data.wiki_id || '';
 	    var wiki_type  = data.wiki_type || '';
 	    var file  = data.file || '';
-	    //var home_page = data.home_page || '';
+	    var home_page = data.home_page || 0;
 	    var page_users = data.page_users || '';
 	    var currDate = new Date();
 	    if(title == '' || content == ''){
@@ -761,7 +852,8 @@ function updateWiki(req, res, cb) {
 			    	 var params = [fName, original_name, fType, wiki_id, currDate, 1];				    	 
 			    	 wikiModel.addWikiDocument(params, function executeSql(sqlErr1,rows1) {	
 			    		if (sqlErr1) {
-								logAndRespond(sqlErr1, res);
+								//logAndRespond(sqlErr1, res);
+			    				log.logger.error(sqlErr1);
 								callback(sqlErr1, '');
 						} else {
 								callback(null, rows1);
@@ -774,10 +866,11 @@ function updateWiki(req, res, cb) {
 			},	
 			function(rows1, callback) {
 				//Edit Wiki page with updated data
-				var params = [title, content, currDate, req.session.user.id,  wiki_type, wiki_id];
+				var params = [title, content, currDate, req.session.user.id,  wiki_type, home_page, wiki_id];
 				wikiModel.updateWikiPage(params, function executeSql(sqlErr2,rows2) {
 					if (sqlErr2) {
-						logAndRespond(sqlErr2, res);
+						//logAndRespond(sqlErr2, res);
+						log.logger.error(sqlErr2);
 						callback(sqlErr2, '');
 					} else {
 						callback(null, rows1,rows2);							
@@ -789,7 +882,8 @@ function updateWiki(req, res, cb) {
 				var params = [wiki_id];
 			    wikiUsersModel.deleteWikiUsers(params, function executeSql(sqlErr3,rows3) {					
 					if (sqlErr3) {
-						logAndRespond(sqlErr3, res);
+						//logAndRespond(sqlErr3, res);
+						log.logger.error(sqlErr3);
 						callback(sqlErr3, '');
 					} 
 					else{
@@ -805,7 +899,8 @@ function updateWiki(req, res, cb) {
 			    	 params.push(wiki_id, page_users[i]);					    	 
 			    	 wikiUsersModel.addWikiUsers(params, function executeSql(sqlErr4,rows4) {					
 						if (sqlErr4) {
-							logAndRespond(sqlErr4, res);
+							//logAndRespond(sqlErr4, res);
+							log.logger.error(sqlErr4);
 							callback(sqlErr4, '');
 						} 
 						else{
