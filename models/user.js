@@ -1,6 +1,7 @@
 var mysql = require('mysql');
-var config = require('../config/config')['development'];
-var connection = mysql.createConnection(config.database);
+var config = require('../config/config');
+var env = config.environment;
+var connection = mysql.createConnection(config[env].database);
 connection.connect();
 
 var getUser = function(conditions, callback) {

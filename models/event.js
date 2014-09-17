@@ -1,6 +1,7 @@
 var mysql = require('mysql');
-var config = require('../config/config')['development'];
-var connection = mysql.createConnection(config.database);
+var config = require('../config/config');
+var env = config.environment;
+var connection = mysql.createConnection(config[env].database);
 connection.connect();
 
 var createEventType = function(params, callback) {
@@ -123,8 +124,7 @@ var deleteEvent = function(params, callback) {
 	})
 }
 
-var getEvent = function(params, callback) {
-	console.log(params);
+var getEvent = function(params, callback) {	
 	var qry = "SELECT events.*, IF((userId = ? OR ? IN(?)),0,1) AS readonly, 'white' AS textColor, event_type.event_color AS color";
 	qry += " FROM events LEFT JOIN event_type ON events.type = event_type.event_type_id";
 	connection.query(qry, params, function(err, rows, fields) {

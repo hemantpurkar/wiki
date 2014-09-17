@@ -1,7 +1,8 @@
 var config = {
+environment : 'development',		
 development: {
     //url to be used in link generation
-    //url: 'http://my.site.com',
+    url: 'http://localhost:3000',
     //mongodb connection settings
     database: {
         host : "localhost",

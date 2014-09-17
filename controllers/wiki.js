@@ -213,7 +213,12 @@ router.get('/:wiki_id/view', function(req, res) {
 				});
 			},	         
 		    function(rows1, callback)   {
-		    	wikiModel.getAllWiki(function executeSql(sqlErr2, rows2) {
+				if(req.session.user.role == 'admin'){
+					method = wikiModel.getAllWiki_withHome;				
+				}else{
+					method = wikiModel.getAllWiki;
+				}
+		    	method(function executeSql(sqlErr2, rows2) {
 					if (sqlErr2) {
 						//logAndRespond(sqlErr2, res);
 						log.logger.error(sqlErr2);
@@ -223,7 +228,7 @@ router.get('/:wiki_id/view', function(req, res) {
 					}
 				});
 		    },    
-		    function(rows1, rows2, callback){  
+		    function(rows1, rows2, callback){
 		    	var params = [wikiId];	
 		    	wikiModel.viewWiki(params, function executeSql(sqlErr3, rows3) {
 					if (sqlErr3) {
@@ -651,7 +656,7 @@ router.get('/:wiki_id/pdf', function(req, res) {
 				var posted= 'by '+rows[0].username;
 				var updated = 'On '+rows[0].updated_on;
 				var content = rows[0].wiki_content;				
-				wkhtmltopdf.command = 'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe';
+				//wkhtmltopdf.command = 'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe';
 				wkhtmltopdf('<h1>'+title+'</h1><p>'+posted+'</p><p>'+updated+'</p><p>'+content+'</p>', { pageSize: 'letter' }).pipe(res);
 				//wkhtmltopdf('http://localhost:3000/wiki/'+wikiId+'/view', { pageSize: 'letter' }).pipe(res);
 			}

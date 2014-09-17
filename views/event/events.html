@@ -32,7 +32,9 @@
             <span class="page-header">
 	            <h1>Calendar <small>Events</small></h1> 
 	            <% var title_header = '<div class="dhx_cal_date"></div>' %>
+				<% if(session_user.role == "admin") { %>
 	            <a href="#" onClick='scheduler.exportToPDF();' class="export_link">Export to PDF</a>
+				<% } %>
             </span>
         </div>                
         <div id="scheduler_here" class="dhx_cal_container" style='width:100%; height:700px;'>
@@ -62,7 +64,7 @@
 <script>
     scheduler.config.xml_date="%Y-%m-%d %H:%i";
     scheduler.init('scheduler_here',new Date(),"month");
-    scheduler.load("/events/getEvent", "json");
+   // scheduler.load("/events/getEvent", "json");
 </script>
 
 <script type="text/javascript" charset="utf-8">

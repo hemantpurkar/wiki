@@ -5,6 +5,7 @@ var userModel = require('../models/user');
 var waterfall = require('async-waterfall');
 var log = require('../lib/logger');
 var apptitle = 'Wiki';
+var fs = require('fs-extra');
 
 /*var logAndRespond = function logAndRespond(err,res,status){
     console.error(err);

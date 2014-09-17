@@ -1,6 +1,7 @@
 var mysql = require('mysql');
-var config = require('../config/config')['development'];
-var connection = mysql.createConnection(config.database);
+var config = require('../config/config');
+var env = config.environment;
+var connection = mysql.createConnection(config[env].database);
 connection.connect();
 
 var getWikiTypes = function(params, callback) {
@@ -129,7 +130,7 @@ var getRecentWiki = function(callback) {
 	qry += 'FROM wiki INNER JOIN user ON wiki.user_id = user.id ';
 	qry += 'WHERE wiki_active=1 AND home_page=0 ';
 	qry += 'ORDER BY updated_date DESC'; 
-	console.log("qry:::",qry);
+	
 	connection.query(qry, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in getRecentWiki query ", err);
