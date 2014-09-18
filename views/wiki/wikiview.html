@@ -11,6 +11,9 @@
 	<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
 	<script type="text/javascript" src="../../javascripts/jquery.cookie.js"></script>
 	<script type="text/javascript" src="../../javascripts/jquery.treeview.js"></script>
+	<script type="text/javascript" src="../../javascripts/html-docx/FileSaver.js"></script>
+	<script type="text/javascript" src="../../javascripts/html-docx/html-docx.js"></script>
+
 	<script type="text/javascript">
 	$(function() {
 		$("#tree").treeview({
@@ -18,6 +21,14 @@
 		 animated: "medium"
 		});  
 	});
+	
+	function exportToWord(){		
+		content = document.getElementById('testContent').innerHTML;			
+		converted = htmlDocx.asBlob(content);
+	    saveAs(converted, 'test.docx');
+	      
+		return;
+	}
 </script>
 </head>
 <body>
@@ -36,19 +47,22 @@
                 		var edit_url = "/wiki/" + data.wiki_id +"/edit";
                 		var export_url = "/wiki/" + data.wiki_id +"/pdf";
 						var delete_url = "/wiki/" + data.wiki_id +"/delete";
+						var word_url = "/wiki/" + data.wiki_id +"/word";
 						if(is_wiki_user.cnt == 1 || session_user.role == 'admin'){
-                	%>
+                	%>                	
                 	<a href="<%= edit_url%>" title="Edit wiki page">Edit</a>
                 	 <% if (session_user.role == 'admin'){
             		 %>  |
-                	<a href="<%= export_url%>" title="Export wiki page" target="_blank">Export</a> 
+                	<a href="<%= export_url%>" title="Export wiki page" target="_blank">PDF</a> 
 						|
+					<a href="#" title="Export to Word" onClick="return exportToWord();">Word</a> 
+						|	
                 	<a href="<%= delete_url%>" title="Export wiki page" onClick="return confirm('Confirm delete?')">Delete</a> 
                 	<% }}	%>
                 </li>    
             </ul>
         </div>
-        <div class="col-lg-8">
+        <div class="col-lg-8" id="testContent">
                 <h2><%= data.wiki_title %></h2>
                 <p><span class="blue_text"><%= data.username%></span> 
 	               <span class="small_text">On <%= data.updated_on %></span></p>

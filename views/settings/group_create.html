@@ -32,14 +32,14 @@
                 <label class="control-label" for="group_name">Group Name</label>
 
                 <div class="controls">
-                    <input type="text" id="group_name" name="group_name" value="<%= data.group_name ? data.group_name : '' %>" oninvalid="setCustomValidity('Please enter a Group name!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
+                    <input type="text" id="group_name" name="group_name" placeholder="Enter group name" value="<%= data.group_name ? data.group_name : '' %>" oninvalid="setCustomValidity('Please enter a Group name!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
                 </div>
             </div>
              <div class="control-group">
                 <label class="control-label" for="group_email">Group Email</label>
 
                 <div class="controls">
-                    <input type="email" id="group_email" name="group_email" value="<%= data.group_email ? data.group_email : '' %>" oninvalid="setCustomValidity('Please enter a valid email address!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
+                    <input type="email" id="group_email" name="group_email" placeholder="Enter group email" value="<%= data.group_email ? data.group_email : '' %>" oninvalid="setCustomValidity('Please enter a valid email address!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
                 </div>
             </div>
             <div class="control-group">

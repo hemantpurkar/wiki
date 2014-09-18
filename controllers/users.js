@@ -129,22 +129,23 @@ router.post('/registration', function(req, res) {
                });
          return;
        }
-    });   
-    
-    var params = [username, password, email];
-    usersModel.addUser(params, function executeSql(err, rows){
-		if (err){ 
-			//logAndRespond(err,res);
-			log.logger.error(err);	
-			return; 
-		}
-		res.statusCode = 201;
-		res.render('user/registration', {
-                   title: apptitle,
-                   message:'<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><h4>Success!</h4>Registration completed successfully</div>',
-                   message_login:''
-               });		
-    });
+       else{
+    	   var params = [username, password, email];
+    	    usersModel.addUser(params, function executeSql(err, rows){
+    			if (err){ 
+    				//logAndRespond(err,res);
+    				log.logger.error(err);	
+    				return; 
+    			}
+    			res.statusCode = 201;
+    			res.render('user/registration', {
+    	                   title: apptitle,
+    	                   message:'<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button><h4>Success!</h4>Registration completed successfully</div>',
+    	                   message_login:''
+    	               });		
+    	    }); 
+       }
+    });           
 });
 
 // home
