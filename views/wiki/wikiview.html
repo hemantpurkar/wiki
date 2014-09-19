@@ -22,10 +22,15 @@
 		});  
 	});
 	
-	function exportToWord(){		
+	function exportToWord(){
+		var now = new Date(); 
+		var datetime = now.getFullYear()+'/'+(now.getMonth()+1)+'/'+now.getDate(); 
+		datetime += ' '+now.getHours()+':'+now.getMinutes()+':'+now.getSeconds(); 	
+		var Fname=document.getElementsByTagName('h2').item(0).innerHTML;
+        var name=Fname+'_'+datetime+'.docx';	
 		content = document.getElementById('testContent').innerHTML;			
 		converted = htmlDocx.asBlob(content);
-	    saveAs(converted, 'test.docx');
+	    saveAs(converted, name);
 	      
 		return;
 	}

@@ -659,7 +659,7 @@ router.get('/:wiki_id/pdf', function(req, res) {
 				var updated = 'On '+rows[0].updated_on;
 				var content = rows[0].wiki_content;			
 				if(env === "development"){
-					wkhtmltopdf.command = 'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe';
+					wkhtmltopdf.command = config[env].wkhtmltopdf_binPath;
 				}
 				wkhtmltopdf('<h1>'+title+'</h1><p>'+posted+'</p><p>'+updated+'</p><p>'+content+'</p>', { pageSize: 'letter' }).pipe(res);
 				//wkhtmltopdf('http://localhost:3000/wiki/'+wikiId+'/view', { pageSize: 'letter' }).pipe(res);
