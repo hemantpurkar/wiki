@@ -9,7 +9,7 @@ development: {
         host : "localhost",
 		user : "root",
 		password: "",
-		database: "node_test"
+		database: "wiki"
     },      
     
     wkhtmltopdf_binPath :  'C:/Program Files/wkhtmltopdf/bin/wkhtmltopdf.exe',
