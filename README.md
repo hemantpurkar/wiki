@@ -4,19 +4,19 @@ Wiki application for intenal projct management similar to confluence
 
 Dependencies
 ====
-Node.js
-npm 
-mysql
+1. Node.js
+2. npm 
+3. mysql
 
 
 
 Installation
 ====
-Check out this repository
-Open the terminal
-Change into the checkd out directory
-npm install ( Install the required dependencies )
-node app.js
+1. Check out this repository
+2. Open the terminal
+3. Change into the checkd out directory
+4. npm install ( Install the required dependencies )
+5. node app.js
 
 How to use
 ====
