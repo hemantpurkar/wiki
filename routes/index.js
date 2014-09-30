@@ -12,13 +12,6 @@ router.get("/", function (req, res) {
 		res.redirect('/users/home'); 
 	}
 	else{		
-		/*res.render('index', {
-			title:apptitle,
-			logged:'false',
-			message_login:'',			
-			wikitype:'',
-		});*/
-		//var params = [req.session.user.id];
 		wikiModel.getWikiHomepage(function executeSql(sqlErr, rows) {			
 			if (sqlErr) {
 				//logAndRespond(sqlErr, res);

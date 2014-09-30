@@ -45,8 +45,6 @@ var deleteGroupUsers = function(params, callback) {
 
 var setGroupLead = function(params, callback) {
 	var qry = 'UPDATE group_users SET is_lead = 1 WHERE user_id = ? AND group_id = ?';
-	console.log("setGroupLead:::",qry);
-	console.log("params:::",params);
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in setGroupLead query ", err);
@@ -58,11 +56,38 @@ var setGroupLead = function(params, callback) {
 }
 
 var getGroupUsers = function(params, callback) {
-	var qry = 'SELECT * FROM group_users WHERE group_id = ?';
+	//var qry = 'SELECT * FROM group_users WHERE group_id = ?';
+	var qry = 'SELECT u.*, gu.* FROM user u INNER JOIN group_users gu ON u.id = gu.user_id AND gu.group_id = ?';
 	
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in getGroupUsers query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
+
+var checkUserExists = function(params, callback) {
+	var qry = 'SELECT * FROM group_users WHERE user_id = ? AND group_id = ?';
+	
+	connection.query(qry, params, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in checkUserExists query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
+
+var addGroupLeads = function(params, callback) {
+	var qry = 'INSERT INTO group_users (user_id, group_id, is_lead) VALUES (?,?,1)';
+	
+	connection.query(qry, params, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in addGroupUsers query ", err);
 			callback(err);
 		} else {
 			callback('', rows);
@@ -75,3 +100,5 @@ exports.addGroupUsers = addGroupUsers;
 exports.setGroupLead = setGroupLead;
 exports.deleteGroupUsers = deleteGroupUsers;
 exports.getGroupUsers = getGroupUsers;
+exports.checkUserExists = checkUserExists;
+exports.addGroupLeads = addGroupLeads;

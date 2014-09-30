@@ -25,21 +25,12 @@
     <div> <%- message %></div>
              
     <div id="regForm">
-        <form action="<%= action %>" method="POST" class="form-horizontal" id="frm_wiki">
-             <div class="control-group">
-                <label class="control-label" for="username_input">Username</label>
-
-                <div class="controls">
-                    <input type="text" id="username_input" name="username" oninvalid="setCustomValidity('Please enter a usename!')" onchange="try{setCustomValidity('')}catch(e){}" required="" placeholder="Enter Username"
-                    <% if(data['username'] != '') {%> value= "<%= data['username']%>" <% } %> readOnly>
-                </div>
-            </div>			
+        <form action="<%= action %>" method="POST" class="form-horizontal" id="frm_wiki">			
             <div class="control-group">
-                <label for="email_input" class="control-label" for="email_input" >Email</label>
+                <label for="email_input" class="control-label" for="email_input">Email</label>
 
                 <div class="controls">
-                    <input type="email" id="email_input" name="email" oninvalid="setCustomValidity('Please enter a valid email address!')" onchange="try{setCustomValidity('')}catch(e){}" required="" placeholder="Enter Email"
-                    <% if(data['email'] != '') {%> value= "<%= data['email']%>" <% } %> readOnly>
+                    <input type="email" id="email_input" name="email" oninvalid="setCustomValidity('Please enter a valid email address!')" onchange="try{setCustomValidity('')}catch(e){}" required="" placeholder="Enter Email">
                 </div>
             </div> 
 
@@ -47,17 +38,14 @@
                 <label for="admin_input" class="control-label" for="admin_input">Is Admin</label>
 
                 <div class="controls">
-                    <input type="radio" id="isAdmin" name="isAdmin" value="1" 
-                    <%- (data['is_admin'] == 1) ? 'checked' : ''%>>Yes
-                    <input type="radio" id="isAdmin" name="isAdmin" value="0"
-                    <%- (data['is_admin'] != 1) ? 'checked' : ''%>>No
+                    <input type="radio" id="isAdmin" name="isAdmin" value="1">Yes
+                    <input type="radio" id="isAdmin" name="isAdmin" value="0" checked>No
                 </div>
             </div>    	
 			
             <div class="control-group">            
                 <div class="controls">
-               		<input type="hidden" name="userId"
-                    <% if(data['id'] != '') {%> value= "<%= data['id']%>" <% } %>>
+               		<input type="hidden" name="userId">
                      <input type="submit" name="Submit" value="Save" class="btn">                    
                      <input type="button" name="Cancel" value="Cancel" class="btn" id="cancel_btn">
                 </div>

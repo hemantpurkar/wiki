@@ -8,7 +8,138 @@ var groupUsersModel = require('../models/group_users');
 var waterfall = require('async-waterfall');
 var pagination = require('../lib/pagination');
 var log = require('../lib/logger');
+var config = require('../config/config');
+var trim = require('trim');
+var async = require('async');
 var apptitle = 'Wiki';
+
+//Load add user page
+router.get('/addUser', function(req, res) {
+	if (req.session.loggedIn) {
+		err_msg = "";
+		redirectAddUser(req, res, 'settings/add_user', null, 'Add', err_msg);
+	}
+});
+
+//Load edit user page
+router.get('/:userId/editUser', function(req, res) {
+	if (req.session.loggedIn) {
+	    var userId  = req.params.userId;
+	    var conditions = 'id = "' + [userId] + '"';
+	    // Get user information
+		userModel.getUser(conditions, function executeSql(sqlErr, rows) {
+			if (sqlErr) {
+				log.logger.error(sqlErr);	
+				return;
+			} else {				
+				redirectAddUser(req, res, 'settings/edit_user', rows[0], 'Edit', null);  
+			}
+		});
+		
+	} else {
+		res.redirect('/');
+	}	
+});
+
+//Save user information
+router.post('/saveUser', function(req, res) {	
+	if (req.session.loggedIn) {		
+		var data = req.body;
+		var email = data.email || '';
+		var isAdmin = data.isAdmin;
+		var userId = data.userId || '';
+		var userInfo;		
+		var action = (userId) ? 'Edit' : 'Add'; 
+		var username = email.split("@")[0];
+
+	    // If any of the inputs is blank
+	    if (email == '') {
+	    	redirectAddUser(req, res, 'settings/add_user', null, action, 'Email can not be blank !!!');  
+	    }
+	    else {	    	
+	    	//Get user info. from activedir... Check user in both pune and chennai location
+			async.series({
+				puneResult : function (callback){
+					config.adPune.findUser(username, function(adPuneErr, puneUser) {						
+						if (adPuneErr) {
+							log.logger.error(adPuneErr);    									
+						    console.log('adPune ERROR: ' +JSON.stringify(adPuneErr));
+						    return;
+						}									
+					    callback(null, puneUser);  								
+					});						  
+				},
+				chennaiResult : function (callback){
+					config.adChennai.findUser(username, function(adChennaiErr, chennaiUser) {
+						if (adChennaiErr) {
+							log.logger.error(adChennaiErr);    									
+						    console.log('adChennai ERROR: ' +JSON.stringify(adChennaiErr));
+						    return;
+						}						
+					    callback(null, chennaiUser);  								
+					});						  
+				},      	
+			}, function(err, results) {
+				if (err) {
+					log.logger.error(err);    												    
+				    return;
+				}
+				else{
+					var userResults;
+					if(results.puneResult){
+						userResults = results.puneResult;
+					}
+					else if(results.chennaiResult) {
+						userResults = results.chennaiResult; 
+					}
+				
+					if(userResults){  // If user exists in pune or chennai
+						//Insert into users table 
+						userInfo = userResults;
+						var params = [userInfo.mail];
+						if(userId) { // If edit user...only update user information
+							var params = [userInfo.employeeID, userInfo.displayName, isAdmin, userInfo.mail];
+	  						userModel.updateUser(params, function executeSql(err, rows){
+			  	  				if (err){     	   
+			  	  					log.logger.error(err);
+			  	  					return;
+			  	  				}  								  		  						  		  	
+			  		  			res.redirect('/settings/listUsers/0'); 
+			  	  			});
+						}
+						else{ // New user .. insert into user table 
+							var params = [email];
+							userModel.checkUserExists_byEmail(params, function executeSql(err, rows){ 			  				
+				  				if (err){     	   
+				  					log.logger.error(err);
+				  					return;
+				  				}  			
+				  				else{
+				  					if(rows.length > 0){ 
+				  						redirectAddUser(req, res, 'settings/add_user', null, action, 'User already registered !!!');		  						
+				  					}	
+				  					else{
+				  						var params = [userInfo.employeeID, userInfo.displayName, userInfo.mail, isAdmin];
+				  						userModel.addUser(params, function executeSql(err, rows){
+						  	  				if (err){     	   
+						  	  					log.logger.error(err);
+						  	  					return;
+						  	  				}  								  		  						  		  	
+						  		  			res.redirect('/settings/listUsers/0'); 
+						  	  			});
+				  					}
+				  				}	  				
+				  			});
+						}						
+					}						
+					else{	// If user is not found redirect to add user page
+						redirectAddUser(req, res, 'settings/add_user', null, action, 'User does not exist with Smartek !!!');					
+					}
+				} 			
+			});		
+		}
+	}   
+});
 
 //Create event type page
 router.get('/createEventType', function(req, res) {
@@ -38,7 +169,6 @@ router.post('/saveEventType', function(req, res) {
 		var params = [title,color];
 		eventModel.createEventType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -55,12 +185,11 @@ router.post('/saveEventType', function(req, res) {
 //delete event type 
 router.get('/:event_type_id/deleteEventType', function(req, res) {
 	if (req.session.loggedIn) {
-	     var type_id  = req.params.event_type_id;
-	     
-		var params = [type_id];
+	    var type_id  = req.params.event_type_id;
+	    var params = [type_id];
+	    // Soft delete event type
 		eventModel.deleteEventType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -79,7 +208,6 @@ router.get("/eventTypes", function(req, res) {
 	if (req.session.loggedIn) {		
 		eventModel.getAllEventTypes(function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -99,7 +227,6 @@ router.get('/:event_id/editevent', function(req, res) {
 		var params = [eventId];
 		eventModel.getEventType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -133,7 +260,6 @@ router.post('/update_eventType', function(req, res) {
 		var params = [title, color, type_id];
 		eventModel.updateEventType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -174,7 +300,6 @@ router.post('/saveWikiType', function(req, res) {
 		var params = [title];
 		wikiModel.createWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -195,7 +320,6 @@ router.get('/:wikiTypeId/editWikiType', function(req, res) {
 		var params = [wikiTypeId];
 		wikiModel.getWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -228,7 +352,6 @@ router.post('/update_wikiType', function(req, res) {
 		var params = [title, type_id];
 		wikiModel.updateWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -246,11 +369,10 @@ router.post('/update_wikiType', function(req, res) {
 router.get('/:wikiTypeId/deleteWikiType', function(req, res) {
 	if (req.session.loggedIn) {
 	     var type_id  = req.params.wikiTypeId;
-	     
 		var params = [type_id];
+		// Soft delete wiki type
 		wikiModel.deleteWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
-				//logAndRespond(sqlErr, res);
 				log.logger.error(sqlErr);	
 				return;
 			} else {
@@ -279,7 +401,6 @@ router.get("/wikiTypes/:page", function(req, res) {
 				
 				wikiModel.getWikiTypeCount(function executeSql(sqlErr, rows) {
 					if (sqlErr) {
-						//logAndRespond(sqlErr, res);
 						log.logger.error(sqlErr);	
 						return;
 					} else {
@@ -291,7 +412,6 @@ router.get("/wikiTypes/:page", function(req, res) {
 			function(pager, callback) {
 				pagination.paginate(pager, function(err, pager_obj, start){
 					if (err) {
-						//logAndRespond(err, res);
 						log.logger.error(err);	
 						return;
 					} else {					
@@ -304,7 +424,6 @@ router.get("/wikiTypes/:page", function(req, res) {
 				wikiModel.getWikiTypes(params,
 						function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								//logAndRespond(sqlErr, res);
 								log.logger.error(sqlErr);	
 								return;
 							} else {
@@ -341,7 +460,6 @@ router.get("/eventTypes/:page", function(req, res) {
 				
 				eventModel.getEventTypeCount(function executeSql(sqlErr, rows) {
 					if (sqlErr) {
-						//logAndRespond(sqlErr, res);
 						log.logger.error(sqlErr);	
 						return;
 					} else {
@@ -353,7 +471,6 @@ router.get("/eventTypes/:page", function(req, res) {
 			function(pager, callback) {
 				pagination.paginate(pager, function(err, pager_obj, start){
 					if (err) {
-						//logAndRespond(err, res);
 						log.logger.error(err);	
 						return;
 					} else {					
@@ -366,7 +483,6 @@ router.get("/eventTypes/:page", function(req, res) {
 				eventModel.getEventTypes(params,
 						function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								//logAndRespond(sqlErr, res);
 								log.logger.error(sqlErr);	
 								return;
 							} else {
@@ -390,63 +506,17 @@ router.get("/eventTypes/:page", function(req, res) {
 
 //Create User Group
 router.get('/createUserGroup', function(req, res) {
-	if (req.session.loggedIn) {   
-		/*waterfall([
-		    function(callback){       
-		    	userModel.getAllUsers(function executeSql(sqlErr1, rows1) {
-					if (sqlErr1) {
-						logAndRespond(sqlErr1, res);
-						return;
-					} else {	
-						callback(null, rows1);						
-					}
-				});
-		    },	
-		    function(rows1, callback){		    	
-		    	groupUsersModel.getAllGroupUsers(function executeSql(sqlErr2, rows2) {
-					if (sqlErr2) {
-						logAndRespond(sqlErr2, res);
-						return;
-					} else {	
-						res.statusCode = 201;
-						res.render('settings/group_create', {
-							data : '',
-							groupId : '',
-							message : '',
-							title : apptitle,			
-							page_message : 'Create',
-							action : '/settings/saveGroup',		
-							users : rows1,
-							group_users : rows2,
-							session_user : req.session.user
-						});
-						return;
-					}								
-				});										
-				callback(null, 'done');
-		    }
-		 ], function(err, result) {
-			// result now equals 'done'
-		});	*/
-		userModel.getAllUsers(function executeSql(sqlErr1, rows1) {
-			if (sqlErr1) {
-				//logAndRespond(sqlErr1, res);
-				log.logger.error(sqlErr1);	
-				return;
-			} else {	
-				res.render('settings/group_create', {
-					data : '',
-					groupId : '',
-					message : '',
-					title : apptitle,			
-					page_message : 'Create',
-					action : '/settings/saveGroup',		
-					users : rows1,
-					group_users : '',
-					session_user : req.session.user
-				});
-				return;					
-			}
+	if (req.session.loggedIn) {
+		res.render('settings/group_create', {
+			data : '',
+			groupId : '',
+			message : '',
+			title : apptitle,			
+			page_message : 'Create',
+			action : '/settings/saveGroup',		
+			users : '',
+			group_users : '',
+			session_user : req.session.user
 		});
 		
 	} else {
@@ -454,26 +524,25 @@ router.get('/createUserGroup', function(req, res) {
 	}
 });
 
-//Save wiki type 
+
+//Save wiki type - For both Add and Update 
 router.post('/saveGroup', function(req, res) {
 	if (req.session.loggedIn) {
 		var data = req.body;
-	    var group_name  = data.group_name || '';
+	    var group_name  = trim(data.group_name) || '';
 	    var currDate = new Date();
-	    var group_users = data.group_users || '';
-	    var group_lead = data.group_lead || '';
-	    var user_group_id = data.user_group_id || '';
-	    var group_email = data.group_email || '';
-	    
+	    var group_users = trim(data.group_users) || '';
+	    var group_lead = trim(data.group_lead) || '';
+	    var user_group_id = trim(data.user_group_id) || '';
+	    var group_email = trim(data.group_email) || '';	    	    	
+
 	    waterfall([
 	   			function(callback) {	
 	   				var rows1;
-	   				if(user_group_id == ''){
-		   				//Add group
+	   				if(user_group_id == ''){ // New Insert.. Add group		   				
 	   			    	 var params = [group_name, group_email, req.session.user.id, currDate, currDate];				    	 
 	   			    	 groupModel.addGroup(params, function executeSql(sqlErr1,rows1) {	
-	   			    		if (sqlErr1) {
-	   								//logAndRespond(sqlErr1, res);
+	   			    		if (sqlErr1) {	   	
 	   			    				log.logger.error(sqlErr1);	
 	   								return;
 	   						} else {
@@ -482,107 +551,128 @@ router.post('/saveGroup', function(req, res) {
 	   						}
 	   					}); 
 	   				}
-		   			else{
-		   				//Update group
+		   			else{	//Update group		   				
 	   			    	 var params = [group_name, group_email, currDate, user_group_id];				    	 
 	   			    	 groupModel.updateGroup(params, function executeSql(sqlErr1,rows1) {	
 	   			    		if (sqlErr1) {
-	   								//logAndRespond(sqlErr1, res);
 	   			    				log.logger.error(sqlErr1);	
 	   								return;
 	   						} else {
-	   								callback(null, user_group_id);
+		   							//Delete existing users from group		
+		   			   				var params = [user_group_id];
+		   			   				groupUsersModel.deleteGroupUsers(params, function executeSql(sqlErr2,rows2) {					
+		   			   					if (sqlErr2) {
+		   			   						log.logger.error(sqlErr2);	
+		   			   						return;
+		   			   					} 
+		   			   					else{
+		   			   						callback(null, user_group_id);
+		   			   					}
+		   			   				});		   								
 	   						}
 	   					});		   				
 		   			}
 	   			},	
-	   			function(user_group_id, callback) {	   	
-	   				//Delete existing users for group users		
-	   				var params = [user_group_id];
-	   				groupUsersModel.deleteGroupUsers(params, function executeSql(sqlErr2,rows2) {					
-	   					if (sqlErr2) {
-	   						//logAndRespond(sqlErr2, res);
-	   						log.logger.error(sqlErr2);	
-	   						return;
-	   					} 
-	   					else{
-	   						callback(null, user_group_id, rows2);
-	   					}
-	   				 });						
+	   			function(user_group_id, callback) {	 
+	   				console.log("group_users:::",group_users);
+	   				if(group_users != ""){
+		   				//Get user id from database for the selected group users
+		   				var emails = extractEmails(group_users).join(',');
+						var params = [emails.split(',')];
+						var cnt =0;
+				    	userModel.getEmployeeId(params, function executeSql(sqlErr3, groupMembers) {					
+							if (sqlErr3) {
+								log.logger.error(sqlErr3);	
+								return;
+							} 
+							else{
+								if(groupMembers.length > 0){
+							    	for(i=0; i < groupMembers.length; i++){
+							    	 params.length = 0;
+							    	 params.push(groupMembers[i].id, user_group_id);
+							    	 groupUsersModel.addGroupUsers(params, function executeSql(sqlErr4,resp) {
+					   					if (sqlErr4) {
+					   						log.logger.error(sqlErr4);	
+					   						return;
+					   					} else {
+					   						cnt++;
+					   						if(cnt == groupMembers.length){ 
+					   							callback(null, user_group_id, groupMembers);	
+					   						}
+					   					}
+							    	 });
+							    	} 
+							    }			
+							}
+						 });	
+	   				}	
+	   				else{
+	   					callback(null, user_group_id, null);
+	   				}
 	   			},
-	   			function(user_group_id, rows2, callback) {
-	   				//Add group users
-	   				var rows3;
-	   				var params = [];
-	   				var cnt =0;
-	   				var user_is_lead = false;
-				    if(group_users.length > 0){
-				    	for(i=0; i < group_users.length; i++){
-				    	 params.length = 0;
-				    	 if(group_lead == group_users[i]){
-				    		 user_is_lead = true;
-				    	 }
-				    	 params.push(group_users[i], user_group_id);
-				    	 groupUsersModel.addGroupUsers(params, function executeSql(sqlErr3,rows3) {
-		   					if (sqlErr3) {
-		   						//logAndRespond(sqlErr3, res);
-		   						log.logger.error(sqlErr3);	
-		   						return;
-		   					} else {
-		   						cnt++;
-		   						if(cnt == group_users.length){
-		   							callback(null, user_group_id, rows2, user_is_lead);	
-		   						}
-		   					}
-				    	 });
-				    	} 
-				    }	 
-				    else{
-				    	callback(null, user_group_id, rows2, user_is_lead);	
-				    }
-	   			},
-	   			function(user_group_id, rows2, user_is_lead, callback) {
-	   				//Assign group lead
-	   			     var params = [group_lead, user_group_id];
-	   			     if(!user_is_lead){
-	   			    	// Is slected users and lead user not same..Insert lead as suser  
-	   			    	groupUsersModel.addGroupUsers(params, function executeSql(sqlErr4,rows4) {
-		   					if (sqlErr4) {
-		   						//logAndRespond(sqlErr4, res);
-		   						log.logger.error(sqlErr4);	
-		   						return;
-		   					} else {
-		   						// Update user as lead
-		   						groupUsersModel.setGroupLead(params, function executeSql(sqlErr5,rows5) {					
-		   	   						if (sqlErr5) {
-		   	   							//logAndRespond(sqlErr5, res);
-		   	   							log.logger.error(sqlErr5);	
-		   	   							return;
-		   	   						} 
-		   	   						else{
-		   	   							res.redirect('/settings/listGroups/0');		   	   							
-		   	   						}
-		   	   				     });
-		   					}
-				    	 });
-	   			     }
-	   			     else{
-	   			    	// Update selected user as lead
-	   			    	groupUsersModel.setGroupLead(params, function executeSql(sqlErr4,rows4) {					
-	   						if (sqlErr4) {
-	   							//logAndRespond(sqlErr4, res);
-	   							log.logger.error(sqlErr4);	
-	   							return;
-	   						} 
-	   						else{
-	   							res.redirect('/settings/listGroups/0');
-	   						}
-	   				     });
-	   			     }		   			    
-	   			     callback(null, 'done');
-	   			} ], function(err, result) {
-	   		// result now equals 'done'
-	   		});	    				
+	   			function(user_group_id, groupMembers, callback) {	 
+	   				//Get user id from database for the selected group lead
+	   				if(group_lead != ""){
+		   				var emails = extractEmails(group_lead).join(',');
+						var params = [emails.split(',')];
+						var cnt = 0;
+				    	userModel.getEmployeeId(params, function executeSql(sqlErr5, groupLead) {		
+							if (sqlErr5) {
+								log.logger.error(sqlErr5);	
+								return;
+							} 
+							else{	
+								if(groupLead.length > 0){							
+							    	for(i=0; i < groupLead.length; i++){						    	
+							    		//Check if the current user added into the database
+							    		var params = [groupLead[i].id, user_group_id];
+							    		groupUsersModel.checkUserExists(params, function executeSql(sqlErr6, leadExists) {					
+										if (sqlErr6) {
+											log.logger.error(sqlErr6);	
+											return;
+										} 
+										else{
+											if(leadExists.length > 0){ 								
+								    			//If current user already added into database, update with is_lead = 1						    			
+						   						groupUsersModel.setGroupLead(params, function executeSql(sqlErr6,rows6) {					
+						   	   						if (sqlErr6) {
+						   	   							log.logger.error(sqlErr6);	
+						   	   							return;
+						   	   						} 
+						   	   						else{
+						   	   							res.redirect('/settings/listGroups/0');		   	   							
+						   	   						}
+						   	   				     });
+								    		}
+								    		else{ 
+								    			//If current user not added into database, insert with is_lead = 1
+								    			groupUsersModel.addGroupLeads(params, function executeSql(sqlErr7,rows7) {
+								   					if (sqlErr7) {
+								   						log.logger.error(sqlErr7);	
+								   						return;
+								   					} else {
+								   						cnt++;
+								   						if(cnt == groupLead.length){
+								   							callback(null, 'done');	
+								   						}
+								   					}
+										    	});
+								    		}
+										}							    								    		
+							    	});
+							    }		
+							  }
+							}	
+				    	});   
+	   				}	
+	   				else{
+	   					callback(null, 'done');	
+	   				}
+	   			}], function(err, result) {
+	    				if(!err){
+	    					res.redirect('/settings/listGroups/0');	
+	    				}
+			});				   			     
 	} else {
 		res.redirect('/');
 	}
@@ -592,9 +682,9 @@ router.post('/saveGroup', function(req, res) {
 router.get('/:group_id/deleteUserGroup', function(req, res) {
 	if (req.session.loggedIn) {   	
 		var params = [req.params.group_id];
+		// Soft delete current group
 		groupModel.deleteGroup(params, function executeSql(sqlErr1, rows1) {
 			if (sqlErr1) {
-				//logAndRespond(sqlErr1, res);
 				log.logger.error(sqlErr1);	
 				return;
 			} else {	
@@ -606,6 +696,7 @@ router.get('/:group_id/deleteUserGroup', function(req, res) {
 		res.redirect('/');
 	}
 });
+
 //user group listing
 router.get("/listGroups/:page", function(req, res) {	
 	waterfall([
@@ -621,7 +712,6 @@ router.get("/listGroups/:page", function(req, res) {
 				
 				groupModel.getGroupCount(function executeSql(sqlErr, rows) {
 					if (sqlErr) {
-						//logAndRespond(sqlErr, res);
 						log.logger.error(sqlErr);	
 						return;
 					} else {
@@ -633,7 +723,6 @@ router.get("/listGroups/:page", function(req, res) {
 			function(pager, callback) {
 				pagination.paginate(pager, function(err, pager_obj, start){
 					if (err) {
-						//logAndRespond(err, res);
 						log.logger.error(err);	
 						return;
 					} else {					
@@ -646,7 +735,6 @@ router.get("/listGroups/:page", function(req, res) {
 				groupModel.getGroupList(params,
 						function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								//logAndRespond(sqlErr, res);
 								log.logger.error(sqlErr);	
 								return;
 							} else {
@@ -668,6 +756,7 @@ router.get("/listGroups/:page", function(req, res) {
 
 });
 
+//Edit group
 router.get('/:group_id/editUserGroup', function(req, res) {
 	if (req.session.loggedIn) {   
 		var groupId = req.params.group_id;
@@ -675,9 +764,9 @@ router.get('/:group_id/editUserGroup', function(req, res) {
 		waterfall([
 			function(callback){  
 				var params = [groupId];
+				//get current group information
 				groupModel.getGroupInfo(params, function executeSql(sqlErr1, groupName) {
 					if (sqlErr1) {
-						//logAndRespond(sqlErr1, res);
 						log.logger.error(sqlErr1);	
 						return;
 					} else {	
@@ -685,23 +774,12 @@ router.get('/:group_id/editUserGroup', function(req, res) {
 					}
 				});
 			},	       
-		    function(groupName, callback){       
-		    	userModel.getAllUsers(function executeSql(sqlErr2, allUsers) {
-					if (sqlErr2) {
-						//logAndRespond(sqlErr2, res);
-						log.logger.error(sqlErr2);	
-						return;
-					} else {	
-						callback(null, groupName, allUsers);						
-					}
-				});
-		    },	
-		    function(groupName, allUsers, callback){  
+		    function(groupName, callback){  
 		    	var params = [groupId];
-		    	groupUsersModel.getGroupUsers(params, function executeSql(sqlErr3, groupUsers) {
-					if (sqlErr3) {
-						//logAndRespond(sqlErr3, res);
-						log.logger.error(sqlErr3);	
+		    	//get all users belonging to the current group
+		    	groupUsersModel.getGroupUsers(params, function executeSql(sqlErr2, groupUsers) {
+					if (sqlErr2) {
+						log.logger.error(sqlErr2);	
 						return;
 					} else {	
 						res.statusCode = 201;
@@ -712,7 +790,6 @@ router.get('/:group_id/editUserGroup', function(req, res) {
 							title : apptitle,			
 							page_message : 'Create',
 							action : '/settings/saveGroup',	
-							users : allUsers,
 							group_users : groupUsers,
 							session_user : req.session.user
 						});
@@ -745,7 +822,6 @@ router.get("/listUsers/:page", function(req, res) {
 				
 				userModel.getUserCount(function executeSql(sqlErr, rows) {
 					if (sqlErr) {
-						//logAndRespond(sqlErr, res);
 						log.logger.error(sqlErr);	
 						return;
 					} else {
@@ -757,7 +833,6 @@ router.get("/listUsers/:page", function(req, res) {
 			function(pager, callback) {
 				pagination.paginate(pager, function(err, pager_obj, start){
 					if (err) {
-						//logAndRespond(err, res);
 						log.logger.error(err);	
 						return;
 					} else {					
@@ -770,7 +845,6 @@ router.get("/listUsers/:page", function(req, res) {
 				userModel.getUserList(params,
 						function executeSql(sqlErr, rows) {
 							if (sqlErr) {
-								//logAndRespond(sqlErr, res);
 								log.logger.error(sqlErr);	
 								return;
 							} else {
@@ -792,13 +866,21 @@ router.get("/listUsers/:page", function(req, res) {
 
 });
 
-/*var logAndRespond = function logAndRespond(err, res, status) {
-	console.error(err);
-	res.statusCode = ('undefined' === typeof status ? 500 : status);
-	res.send({
-		result : 'error',
-		err : err.code
+// Function to get/extract the emailId from input text
+function extractEmails (text){
+    return text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
+}
+
+function redirectAddUser(req, res, renderView, userInfo, page_message, msg){
+	res.render(renderView, {
+		data : userInfo,
+		title: apptitle,
+		message_login:'',
+		message : msg,
+		page_message: page_message,
+		action : '/settings/saveUser',
+		session_user : req.session.user
 	});
-};*/
+}
 
 module.exports = router;

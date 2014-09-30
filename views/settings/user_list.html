@@ -19,6 +19,9 @@
                 <li><a href="/">Home</a> <span class="divider">/</span></li>
                 <li class="active">Users</li>
                 <li class="float-right"><a href="#" title="Add User"> </a></li>
+                <li class="float-right">
+                	<a href="/settings/addUser" title="Add new user">Add New User</a>
+                </li>  
             </ul>
         </div>
     </div>
@@ -33,7 +36,7 @@
             <thead>
                 <tr>
                     <th>Sr no.</th>
-                    <th>User name</th>
+                    <th>User display name</th>
 					<th>Email</th>
 					<th>Administrator</th>
                 </tr>
@@ -45,7 +48,7 @@
                 <tr>
                     <td><%= parseInt(pager.currPage+i)  %></td>					
                     <td><%- data[s]['username'] %></td>
-					<td><%- data[s]['email'] %></td>
+					<td><a href="/settings/<%-data[s]['id']%>/editUser"><%- data[s]['email'] %></a></td>
 					<td><%- (data[s]['is_admin'] == 1) ? 'Yes' : 'No' %><td>               
                 </tr>
                  <% } %>							

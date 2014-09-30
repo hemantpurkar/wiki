@@ -6,6 +6,9 @@
     <link rel="stylesheet" href="../../stylesheets/bootstrap.css">
     <link rel="stylesheet" href="../../stylesheets/bootstrap-responsive.css">
     <link rel="stylesheet" href="../../stylesheets/site.css">
+    <link rel="stylesheet" href="../../javascripts/jquery-ui/jquery-ui.min.css"></script> 
+	<link rel="stylesheet" href="../../javascripts/jquery-ui/jquery-ui.structure.min.css"></script> 
+	<link rel="stylesheet" href="../../javascripts/jquery-ui/jquery-ui.theme.min.css"></script>
 </head>
 <body>
 <%- include ../header.html %>
@@ -26,7 +29,6 @@
          
     
     <div id="regForm">
-
         <form action="<%= action %>" method="POST" class="form-horizontal">
             <div class="control-group">
                 <label class="control-label" for="group_name">Group Name</label>
@@ -37,49 +39,28 @@
             </div>
              <div class="control-group">
                 <label class="control-label" for="group_email">Group Email</label>
-
                 <div class="controls">
                     <input type="email" id="group_email" name="group_email" placeholder="Enter group email" value="<%= data.group_email ? data.group_email : '' %>" oninvalid="setCustomValidity('Please enter a valid email address!')" onchange="try{setCustomValidity('')}catch(e){}" required="">
                 </div>
-            </div>
+            </div>           
             <div class="control-group">
-            	<label for="content_input" class="control-label" for="content_input">Add group users</label>
+                <label class="control-label" for="group_email">Add group users</label>
                 <div class="controls">
-                	<table class="user-selection">
-                		<tr>
-			                <% for(var i=0; i<users.length; i++) {
-			                    if(i % 4 == 0){                 	                      
-			                %>	</tr>	<% } %>			                	                
-			                		<td>
-			                			<input type="checkbox" name="group_users[]" value="<%= users[i]['id'] %>" 
-			                		<% 
-			                		for(var j=0; j< group_users.length;j++){    
-			                			if(users[i]['id'] ==  group_users[j]['user_id']) {%> checked <%}
-			                		} %>
-			                		/> <%= users[i]['username'] %>
-			                		</td>	                			                	
-			                <%	} %>
-	                	</tr>
-	                </table>
+					<div class="ui-widget">			
+						<textarea class="searchList text-long-add txtarea_size" name="group_users" style=""><% 
+	                		for(var i=0; i< group_users.length;i++){    
+	                			if(group_users[i]['is_lead']!=1) { %><%= group_users[i]['username'] + "<" + group_users[i]['email'] + ">," %><%}} %></textarea>
+					</div>
                 </div>
-            </div>
+            </div>                                  
             <div class="control-group">
                 <label class="control-label" for="title_input">Assign Group Lead</label>
-
                 <div class="controls">
-                    <select name="group_lead">
-                    	 <option key="">Select</option>
-                    	 <% for(var i=0; i<users.length; i++) {%>	
-			              	<option value="<%= users[i]['id'] %>"
-			              		<% 
-			                		for(var j=0; j< group_users.length;j++){    
-			                			if((users[i]['id'] ==  group_users[j]['user_id']) && group_users[j]['is_lead']==1) {%> selected <%}
-			                		} %>
-			              > 
-			              		<%= users[i]['username'] %>
-			              	</option>
-			             <% } %>
-                    </select>
+                    <div class="ui-widget">			
+						<textarea class="searchList text-long-add txtarea_size" name="group_lead" cols="100"><% 
+	                		for(var i=0; i< group_users.length;i++){    
+	                			if(group_users[i]['is_lead']==1) { %><%= group_users[i]['username'] + "<" + group_users[i]['email'] + ">," %><%}} %></textarea>
+					</div>
                 </div>
             </div>
             <div class="control-group">
@@ -94,6 +75,9 @@
 </div>
 <script type="text/javascript" src="../../javascripts/jquery.js"></script>
 <script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
+<script type="text/javascript" src="../../javascripts/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="../../javascripts/autosize/jquery.autosize.min.js"></script> 
+<script type="text/javascript" src="../../javascripts/autosuggestion.js"></script> 
 <script>
 $("#cancel_btn").click(function(e){
     window.location = "/settings/listGroups/0";
