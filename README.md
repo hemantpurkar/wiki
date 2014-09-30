@@ -1,6 +1,6 @@
 wiki
 ====
-Wiki application for intenal projct management similar to confluencew
+Wiki application for intenal projct management similar to confluence
 
 Dependencies
 ====
