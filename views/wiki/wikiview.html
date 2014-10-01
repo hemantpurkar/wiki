@@ -13,15 +13,14 @@
 	<script type="text/javascript" src="../../javascripts/jquery.treeview.js"></script>
 	<script type="text/javascript" src="../../javascripts/html-docx/FileSaver.js"></script>
 	<script type="text/javascript" src="../../javascripts/html-docx/html-docx.js"></script>
-
+	<script type="text/javascript" src="../../javascripts/jquery.treeview.async.js"></script>
 	<script type="text/javascript">
-	$(function() {
-		$("#tree").treeview({
-		 collapsed: false,
-		 animated: "medium"
-		});  
-	});
-	
+	$(document).ready(function(){
+	    $("#asynctree").treeview({
+			url: "/wiki/getTree"
+		});
+	});	
+
 	function exportToWord(){
 		var now = new Date(); 
 		var datetime = now.getFullYear()+'/'+(now.getMonth()+1)+'/'+now.getDate(); 

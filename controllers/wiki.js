@@ -929,3 +929,109 @@ function updateWiki(req, res, cb) {
 		});
 	}
 }
+
+router.get('/getTree', function(req, res) {
+	waterfall([
+			function(callback) {
+				wikiModel.getAllParentWiki(function(err, results){
+				if (err) return res.send(500, "getAllWikiTypes QUERY ERROR");
+				else 
+					callback(null, results);
+				})
+		    },						
+			function(results, callback) {		    					
+				var wikiTypeArr = [];
+				for (i=0; i < results.length; i++) {										
+					wikiTypeArr.push(results[i]['type_id']); 
+				}	
+								
+				params = [wikiTypeArr];			
+				wikiModel.getWikiperType(params, function(err, childtypes){							
+					if (err) {
+						return res.send(500, "getWikiperType QUERY ERROR");						
+					}
+					else { 
+						if(childtypes.length > 0){ 	
+							var childArr = [];
+							for (j=0; j < childtypes.length; j++) {	
+								var wikiId;
+								wikiId = childtypes[j]['wiki_id'];
+								childArr.push({
+									"type_id": childtypes[j]['wiki_id'] + config.RAND_VAL, 
+									"wiki_parent_type": childtypes[j]['wiki_type'], 
+									"wiki_type": "<a href='/wiki/"+ wikiId +"/view'>"+ childtypes[j]['wiki_title'] +"</a>"
+									});
+																
+							}	
+							var treeData = results.concat(childArr);							
+					    	var sortedquery = queryTreeSort({q:treeData});
+					    	var tree = makeTree({q: sortedquery});				    					    
+						}							
+						callback(null, tree);
+					}
+				});									
+			} ], function(err, result) {
+				if(!err){						
+					res.json(result);
+				}	
+			})
+});
+
+function queryTreeSort(options) {	
+	  var cfi, e, i, id, o, pid, rfi, ri, thisid, _i, _j, _len, _len1, _ref, _ref1;
+	  id = options.type_id || "type_id";
+	  pid = options.wiki_parent_type || "wiki_parent_type";
+	  	 
+	  ri = [];
+	  rfi = {};
+	  cfi = {};
+	  o = [];
+	  _ref = options.q;
+	  for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+	    e = _ref[i];
+	    rfi[e[id]] = i;
+	    if (cfi[e[pid]] == null) {
+	      cfi[e[pid]] = [];
+	    }
+	    cfi[e[pid]].push(options.q[i][id]);
+	  }
+	  _ref1 = options.q;
+	  for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+	    e = _ref1[_j];
+	    if (rfi[e[pid]] == null) {
+	    	
+	      ri.push(e[id]);
+	    }
+	    
+	  }
+	  while (ri.length) {
+	    thisid = ri.splice(0, 1);
+	    o.push(options.q[rfi[thisid]]);
+	    if (cfi[thisid] != null) {
+	      ri = cfi[thisid].concat(ri);
+	    }
+	  }
+	  return o;
+};
+
+function makeTree(options) {
+	  //console.log('opt',options);
+	  var children, e, id, o, pid, temp, _i, _len, _ref;
+	  id = options.type_id || "type_id";
+	  pid = options.wiki_parent_type || "wiki_parent_type";
+	  children = options.children || "children";
+	  temp = {};
+	  o = [];
+	  _ref = options.q;
+	  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+	    e = _ref[_i];
+	    e[children] = [];
+	    temp[e[id]] = e;
+	    if (temp[e[pid]] != null) {
+	      temp[e[pid]][children].push(e);
+	    } else {
+	      o.push(e);
+	    }
+	  }
+	  return o;
+};

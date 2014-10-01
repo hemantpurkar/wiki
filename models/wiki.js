@@ -181,7 +181,7 @@ var updateWikiPage = function(params, callback) {
 }
 
 var updateWikiType = function(params, callback) {
-	var qry = 'UPDATE wiki_type SET wiki_type= ? WHERE type_id= ?';
+	var qry = 'UPDATE wiki_type SET wiki_type= ?, wiki_parent_type = ? WHERE type_id= ?';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in updateWikiType query ", err);
@@ -193,7 +193,7 @@ var updateWikiType = function(params, callback) {
 }
 
 var createWikiType = function(params, callback) {
-	var qry = 'INSERT INTO wiki_type (wiki_type) VALUES (?)';
+	var qry = 'INSERT INTO wiki_type (wiki_type, wiki_parent_type) VALUES (?, ?)';
 	connection.query(qry, params, function(err, rows, fields) {
 		if (err) {
 			console.log("Error in createWikiType query ", err);
@@ -228,15 +228,7 @@ var deleteWikiPage = function(params, callback) {
 	})
 }
 
-var getWikiHomepage = function(callback) {		
-		/*var qry = 'SELECT wiki.wiki_id, wiki.wiki_title, wiki.wiki_content, wiki.wiki_type, DATE_FORMAT( updated_date,  "%d %b %Y, %h:%i %p" ) AS updated_date';
-		qry += ' FROM wiki AS wiki';
-		qry += ' LEFT JOIN wiki_users ON wiki.wiki_id = wiki_users.wiki_id';
-		qry += ' LEFT JOIN group_users gu ON gu.group_id = wiki_users.group_id AND gu.user_id = 1';
-		qry += ' WHERE wiki.home_page =1';	
-		qry += ' ORDER BY wiki.updated_date DESC';	
-		qry += ' LIMIT 0 , 1';	*/
-		
+var getWikiHomepage = function(callback) {
 	var qry = 'SELECT wiki.wiki_id, wiki.wiki_title, wiki.wiki_content, wiki.wiki_type, DATE_FORMAT( updated_date,  "%d %b %Y, %h:%i %p" ) AS updated_date';
 		qry += ' FROM wiki AS wiki';
 		qry += ' WHERE wiki.home_page =1';	
@@ -250,6 +242,47 @@ var getWikiHomepage = function(callback) {
 			callback('', rows);
 		}
 	})
+}
+
+var getAllParentWiki = function(callback) {
+	var qry = 'SELECT type_id,wiki_parent_type,wiki_type FROM wiki_type WHERE is_deleted = 0 ORDER BY wiki_type ';
+	
+	connection.query(qry, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in getAllParentWiki query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
+
+var getWikiperType = function(params, callback) {
+	var qry = 	"SELECT w.wiki_id,w.wiki_title,w.wiki_type, wt.wiki_type AS type FROM wiki w ";
+		qry += 	"LEFT JOIN wiki_type wt ON w.wiki_type = wt.type_id ";
+		qry += 	"WHERE w.wiki_type IN(?) and w.wiki_active=1 order by w.wiki_id desc";
+
+	connection.query(qry, params, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in getWikiperType query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
+
+var getUpdateWikiTypes = function(params, callback) {
+	var qry = 'SELECT * FROM wiki_type WHERE type_id != ? AND is_deleted = 0 ';
+	 
+	connection.query(qry, params, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in getUpdateWikiTypes query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	 })
 }
 
 exports.getWikiType = getWikiType;
@@ -271,3 +304,6 @@ exports.getRecentWiki = getRecentWiki;
 exports.getAllWiki_withHome = getAllWiki_withHome;
 exports.getRecentWiki_withHome = getRecentWiki_withHome;
 exports.deleteWikiPage = deleteWikiPage;
+exports.getAllParentWiki = getAllParentWiki; 
+exports.getWikiperType = getWikiperType; 
+exports.getUpdateWikiTypes = getUpdateWikiTypes; 

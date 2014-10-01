@@ -176,6 +176,12 @@ INSERT INTO `wiki_type` (`type_id`, `wiki_type`, `is_deleted`) VALUES
 (1, 'Page', 0),
 (2, 'Blog', 0),
 
+--
+-- Alter table `wiki_type` : Adding column 'wiki_parent_type'
+--
+
+ALTER TABLE  `wiki_type` ADD  `wiki_parent_type` INT( 2 ) NOT NULL DEFAULT  '0' COMMENT  'Parent Id for wiki type';
+
 -- --------------------------------------------------------
 
 --

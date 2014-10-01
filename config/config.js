@@ -45,6 +45,9 @@ adChennai : new ActiveDirectory({ url: 'ldap://192.168.8.50/',
 
 // 512 : Active Directory normal account enabled
 NORMAL_ACCOUNT : 512, 
+
+//10000 : Value added to wiki_type_id (Used in settings controller)
+RAND_VAL : 10000,
 }  
 
 module.exports = config;

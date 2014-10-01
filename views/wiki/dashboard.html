@@ -11,13 +11,13 @@
 	<script type="text/javascript" src="../../javascripts/bootstrap.min.js"></script>
 	<script type="text/javascript" src="../../javascripts/jquery.cookie.js"></script>
 	<script type="text/javascript" src="../../javascripts/jquery.treeview.js"></script>
+	<script type="text/javascript" src="../../javascripts/jquery.treeview.async.js"></script>
 	<script type="text/javascript">
-	$(function() {
-		$("#tree").treeview({
-		 collapsed: true,
-		 animated: "medium"
+	$(document).ready(function(){
+	    $("#asynctree").treeview({
+			url: "/wiki/getTree"
 		});
-	})	
+	});	
 </script>  	
 </head>
 <body>

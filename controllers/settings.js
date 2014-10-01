@@ -275,17 +275,24 @@ router.post('/update_eventType', function(req, res) {
 
 //Create wiki type page
 router.get('/createWikiType', function(req, res) {
-	if (req.session.loggedIn) {	     
-		res.render('settings/wiki_type_post', {
-            title: apptitle,
-            message: '',
-            page_message: 'Create',
-            data:'',
-            wikitype:'',
-            action:'/settings/saveWikiType',
-            session_user : req.session.user
-        });
-		
+	if (req.session.loggedIn) {		
+		wikiModel.getAllParentWiki(function executeSql(sqlErr1, rows1) {
+			if (sqlErr1) {
+				log.logger.error(sqlErr1);	
+				return;
+			} else {	
+				res.render('settings/wiki_type_post', {
+					title : apptitle,
+					message : '',					
+					page_message : 'Create',
+					data : '',
+					action : '/settings/saveWikiType',		
+					parent : rows1,
+					session_user : req.session.user
+				});
+				return;					
+			}
+		});
 	} else {
 		res.redirect('/');
 	}
@@ -296,8 +303,9 @@ router.post('/saveWikiType', function(req, res) {
 	if (req.session.loggedIn) {
 		var data = req.body;
 	    var title  = data.title || '';
+		var parent = data.wiki_parent || '';
 	     
-		var params = [title];
+		var params = [title,parent];
 		wikiModel.createWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
 				log.logger.error(sqlErr);	
@@ -318,24 +326,42 @@ router.get('/:wikiTypeId/editWikiType', function(req, res) {
 	if (req.session.loggedIn) {
 		var wikiTypeId = req.params.wikiTypeId;
 		var params = [wikiTypeId];
-		wikiModel.getWikiType(params, function executeSql(sqlErr, rows) {
-			if (sqlErr) {
-				log.logger.error(sqlErr);	
-				return;
-			} else {
-				res.statusCode = 201;
-				res.render('settings/wiki_type_post', {
-					data : rows[0],
-					message : '',
-					title : apptitle,
-					wikiattchment : '',
-					page_message : 'Edit',
-					action : '/settings/update_wikiType',	
-					session_user : req.session.user
+		waterfall([
+		    function(callback){       
+				wikiModel.getWikiType(params, function executeSql(sqlErr1, rows1) {
+					if (sqlErr1) {
+						log.logger.error(sqlErr1);	
+						callback(sqlErr1, '');
+					} else {	
+						callback(null, rows1);						
+					}
 				});
-				return;
-			}
-		});
+		    },	
+		    function(rows1, callback){	
+		    	wikiModel.getUpdateWikiTypes(params, function executeSql(sqlErr2, rows2) {
+					if (sqlErr2) {
+						log.logger.error(sqlErr2);	
+						callback(sqlErr2, '');
+					} else {	
+						res.statusCode = 201; 
+						res.render('settings/wiki_type_post', {
+							data : rows1[0],
+							message : '',
+							title : apptitle,
+							wikiattchment : '',
+							page_message : 'Edit',
+							action : '/settings/update_wikiType',
+							parent : rows2,
+							session_user : req.session.user
+						});
+						return;
+					}								
+				});										
+				callback(null, 'done');
+		    }
+		 ], function(err, result) {
+			// result now equals 'done'
+		});	
 		
 	} else {
 		res.redirect('/');
@@ -347,9 +373,10 @@ router.post('/update_wikiType', function(req, res) {
 	if (req.session.loggedIn) {
 		var data = req.body;
 	    var title  = data.title || '';
-	    var type_id  = data.wiki_type_id || '';
-	     
-		var params = [title, type_id];
+		var parent = data.wiki_parent || '';
+		var type_id  = data.wiki_type_id || '';
+
+		var params = [title, parent, type_id];
 		wikiModel.updateWikiType(params, function executeSql(sqlErr, rows) {
 			if (sqlErr) {
 				log.logger.error(sqlErr);	

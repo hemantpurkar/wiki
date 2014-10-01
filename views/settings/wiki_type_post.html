@@ -28,7 +28,23 @@
     <div id="regForm">
 
         <form action="<%= action %>" method="POST" class="form-horizontal">
-            <div class="control-group">
+            
+			
+			<div class="control-group">
+                <label class="control-label" for="title_input">Parent Wiki Type</label>
+				<div class="controls">
+                    <select name="wiki_parent">
+                    	 <option key="">Select</option>
+                    	 <% for(var i=0; i<parent.length; i++) {%>	
+			              	<option value="<%= parent[i]['type_id'] %>" <% if(data.wiki_parent_type == parent[i]['type_id']) {%> selected <% } %>>
+			              		
+			              		<%= parent[i]['wiki_type'] %>
+			              	</option>
+			             <% } %>
+                    </select>
+                </div>
+            </div>
+			<div class="control-group">
                 <label class="control-label" for="title_input">Title</label>
 
                 <div class="controls">
