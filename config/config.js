@@ -17,18 +17,15 @@ development: {
 },
 production: {
     //url to be used in link generation
-    url: 'http://my.site.com',
+    url: 'http://192.168.50.120:3000',      
+    
     //mysql connection settings
     database: {
-        host: '127.0.0.1',
-        port: '27017',
-        db:     'site'
+        host : "localhost",
+		user : "root",
+		password: "root",
+		database: "wiki"
     },
-    //server details
-    server: {
-        host:   '127.0.0.1',
-        port:   '3421'
-    }
 },
 
 adPune : new ActiveDirectory({ url: 'ldap://pune.smartek21.st21/',
