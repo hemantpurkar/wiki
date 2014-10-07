@@ -28,12 +28,14 @@ production: {
     },
 },
 
+//Active directory ... Pune location configuration variable
 adPune : new ActiveDirectory({ url: 'ldap://pune.smartek21.st21/',
     baseDN: 'dc=pune,dc=smartek21,dc=st21',
     username: 'hemantp@pune.smartek21.st21',
     password:'smartek123$'
 }),
-                               
+  
+//Active directory ... Chennai location configuration variable
 adChennai : new ActiveDirectory({ url: 'ldap://192.168.8.50/',
     baseDN: 'dc=chennai,dc=smartek21,dc=st21',
     username: 'adread@chennai.smartek21.st21',

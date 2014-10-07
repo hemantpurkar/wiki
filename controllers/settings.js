@@ -898,6 +898,7 @@ function extractEmails (text){
     return text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
 }
 
+//Common function to redirect user 
 function redirectAddUser(req, res, renderView, userInfo, page_message, msg){
 	res.render(renderView, {
 		data : userInfo,

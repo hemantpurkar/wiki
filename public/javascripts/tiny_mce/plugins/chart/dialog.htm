@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Build Column Charts</title>
+<script type="text/javascript" src="../../tiny_mce_popup.js"></script>
+<script type="text/javascript" src="js/dialog.js"></script>
+<script type="text/javascript" src="jscolor/jscolor.js"></script>
+<script type="text/javascript">
+function addRowInChart(){
+	var countOfRows = document.getElementById('chartsTinyMceRowsCount').value;
+	if(!isNaN(new Number(countOfRows))){
+		var nextRowsCount = new Number(countOfRows) + 1;
+		//var htmlOfRowsContainer = document.getElementById('chartsTinyMceRows').innerHTML;
+		var htmlOfRowsContainer = '';
+		new Array();
+		var chartsAlreadyValues = new Array();
+		var chartsAlreadyIds = new Array();
+		for(i=0; i<countOfRows; i++){
+			var idOfAlreadyrow = i + 1;
+			var chartsAlreadyDescription = document.getElementById('someval'+idOfAlreadyrow).value;
+			var chartsAlreadyValue = document.getElementById('somearg'+idOfAlreadyrow).value;
+			if(chartsAlreadyDescription==null){
+				chartsAlreadyDescription = '';
+			}
+			if(chartsAlreadyValue==null){
+				chartsAlreadyValue = '';
+			}
+			htmlOfRowsContainer = htmlOfRowsContainer + '<div style="margin-top:5px;margin-bottom:5px;" id="chartsTinyMceRow'+idOfAlreadyrow+'"><input readonly="readonly" type="text" style="width:40px;border:0px; background:#f0f0ee" value="'+idOfAlreadyrow+'" /><input value="'+chartsAlreadyDescription+'" id="someval'+idOfAlreadyrow+'" name="someval'+idOfAlreadyrow+'" type="text" class="text" style="width:180px; margin-right:20px;" /><input value="'+chartsAlreadyValue+'" onkeydown="onlyNumbers(this);" onkeyup="onlyNumbers(this);" id="somearg'+idOfAlreadyrow+'" name="somearg'+idOfAlreadyrow+'" type="text" class="text" value="" style="width:100px;" /></div>';
+		}
+		htmlOfRowsContainer = htmlOfRowsContainer + '<div style="margin-top:5px;margin-bottom:5px;" id="chartsTinyMceRow'+nextRowsCount+'"><input readonly="readonly" type="text" style="width:40px;border:0px; background:#f0f0ee" value="'+nextRowsCount+'" /><input id="someval'+nextRowsCount+'" name="someval'+nextRowsCount+'" type="text" class="text" style="width:180px; margin-right:20px;" /><input onkeydown="onlyNumbers(this);" onkeyup="onlyNumbers(this);" id="somearg'+nextRowsCount+'" name="somearg'+nextRowsCount+'" type="text" class="text" value="" style="width:100px;" /></div>'
+		document.getElementById('chartsTinyMceRows').innerHTML = htmlOfRowsContainer;
+		document.getElementById('chartsTinyMceRowsCount').value = nextRowsCount;
+	}
+}
+
+function deleteRowInChart(){
+	var countOfRows = document.getElementById('chartsTinyMceRowsCount').value;
+	if(!isNaN(new Number(countOfRows))){
+		if(countOfRows>1){
+			var nextRowsCount = new Number(countOfRows) - 1;
+			var elementToRemove = document.getElementById('chartsTinyMceRow'+countOfRows);
+  			elementToRemove.parentNode.removeChild(elementToRemove);
+			document.getElementById('chartsTinyMceRowsCount').value = nextRowsCount;
+		}
+	}
+}
+
+String.prototype.startsWith = function(str) {return (this.match("^"+str)==str)}
+
+function onlyNumbers(element){
+	if(element.value!=null){
+		if(element.value.length>0){
+			if(element.value.startsWith("-")){
+				if(element.value.length>1){
+					var stringToValidate = element.value.substring(1, element.value.length);
+					stringToValidate = stringToValidate.replace("-","");
+					if(isNaN(new Number(stringToValidate))){
+						//element.value = "-" + stringToValidate.substring(0, stringToValidate.length - 1);
+						//element.value = "-" + stringToValidate.replace(/[^0-9]/g, ''); 
+						stringToValidate = stringToValidate.replace(/[^0123456789\.?]/g, ''); 
+					}
+					element.value = "-" + stringToValidate; 
+					var countDots = 0;
+					var finaleString = "";
+					if(element.value!=null){
+						for (i=0;i<element.value.length;i++){
+							if(element.value.charAt(i)=="."){
+								countDots = countDots +1;
+								if(countDots==1){
+									finaleString = finaleString + element.value.charAt(i);
+								}
+							}
+							else{
+								finaleString = finaleString + element.value.charAt(i);
+							}
+						}
+					}
+					element.value = finaleString;
+				}
+			}
+			else{
+				if(isNaN(new Number(element.value))){
+					//element.value = element.value.substring(0, element.value.length - 1);
+					//element.value = element.value.replace(/[^0-9]/g, ''); 
+					element.value = element.value.replace(/[^0123456789\.?]/g, '');
+					var countDots = 0;
+					var finaleString = "";
+					if(element.value!=null){
+						for (i=0;i<element.value.length;i++){
+							if(element.value.charAt(i)=="."){
+								countDots = countDots +1;
+								if(countDots==1){
+									finaleString = finaleString + element.value.charAt(i);
+								}
+							}
+							else{
+								finaleString = finaleString + element.value.charAt(i);
+							}
+						}
+					}
+					element.value = finaleString;
+				}
+			}
+		}
+	}
+}
+
+function integerPositiveOnly(element){
+	if(isNaN(new Number(element.value))){
+		element.value = element.value.replace(/[^0123456789\.?]/g, '');
+		if(element.value!=null){
+			var finaleString = '';
+			for (i=0;i<element.value.length;i++){
+				if(element.value.charAt(i)=="."){
+					//do not add the dot
+				}
+				else{
+					finaleString = finaleString + element.value.charAt(i);
+				}
+			}
+			element.value = finaleString;
+		}
+	}
+	else{
+		var theNumberIs = new Number(element.value);
+		if(theNumberIs<0){
+			element.value = -theNumberIs;
+		}
+		if(element.value!=null){
+			var finaleString = '';
+			for (i=0;i<element.value.length;i++){
+				if(element.value.charAt(i)=="."){
+					//do not add the dot
+				}
+				else{
+					finaleString = finaleString + element.value.charAt(i);
+				}
+			}
+			element.value = finaleString;
+		}
+	}
+}
+</script>
+</head>
+<body>
+
+<form onsubmit="ExampleDialog.insert();return false;" action="#">
+	<p>Insert bellow the values of your Column Chart:</p><br />
+    <div align="center">
+    Chart Title:<br />
+    <input type="text" name="chartTitle" id="chartTitle" style="width:376px;" /><br /><br />
+    <table width="376" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="220" height="25" align="right" valign="middle">Negative   Column Color:&nbsp;</td>
+        <td width="156" align="left" valign="middle">&nbsp;<input name="chartsTinyMceNegativeColor" id="chartsTinyMceNegativeColor" class="color" value="006699" style="width:80px;" /></td>
+      </tr>
+      <tr>
+        <td height="25" align="right" valign="middle">Positive  Column Color:&nbsp;</td>
+        <td align="left" valign="middle">&nbsp;<input name="chartsTinyMcePositiveColor" id="chartsTinyMcePositiveColor" class="color" value="FF9900" style="width:80px;"></td>
+      </tr>
+      <tr>
+        <td height="25" align="right" valign="middle">Chart Background Color:&nbsp;</td>
+        <td align="left" valign="middle">&nbsp;<input name="chartsTinyMceBackgroundColor" id="chartsTinyMceBackgroundColor" class="color" value="FFFFFF" style="width:80px;"></td>
+      </tr>
+      <tr>
+        <td height="25" align="right" valign="middle">Chart Border Color:&nbsp;</td>
+        <td align="left" valign="middle">&nbsp;<input name="chartsTinyMceBorderColor" id="chartsTinyMceBorderColor" class="color" value="666666" style="width:80px;"></td>
+      </tr>
+      <tr>
+        <td height="25" align="right" valign="middle">Chart Width:&nbsp;</td>
+        <td align="left" valign="middle">&nbsp;<input name="chartsTinyMceWidth" id="chartsTinyMceWidth" value="300" style="width:80px;" onkeydown="integerPositiveOnly(this);" onkeyup="integerPositiveOnly(this);">pixels</td>
+      </tr>
+    </table>
+    <input type="hidden" name="chartsTinyMceRowsCount" id="chartsTinyMceRowsCount" value="1" /><br />
+    Chart Values:<br />
+    <table width="376" border="0" cellspacing="0" cellpadding="0">
+      <tr>
+        <td width="220" align="left" valign="top"><div style="margin-left:40px;">Column Description</div></td>
+        <td width="120" align="left" valign="top"><div style="margin-left:20px;">Column Value</div></td>
+        <td width="36" align="left" valign="top"><img id="addNewChartRow" src="../../../../images/plus.gif" border="0" style="cursor:pointer;" onclick="addRowInChart();" /><img id="deleteNewChartRow" src="../../../../images/minus.gif" border="0" style="cursor:pointer;" onclick="deleteRowInChart();" /></td>
+      </tr>
+      <tr>
+        <td colspan="3" align="left" valign="top" id="chartsTinyMceRows">
+        <div style="margin-top:5px;margin-bottom:5px;" id="chartsTinyMceRow1"><input type="text" readonly="readonly" style="width:40px;border:0px; background:#f0f0ee" value="1" /><input id="someval1" name="someval1" type="text" class="text" style="width:180px; margin-right:20px;" /><input onkeydown="onlyNumbers(this);" onkeyup="onlyNumbers(this);" id="somearg1" name="somearg1" type="text" class="text" value="" style="width:100px;" /></div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <br />
+<div class="mceActionPanel">
+		<input type="button" id="insert" name="insert" value="{#insert}" onclick="ExampleDialog.insert();" />
+		<input type="button" id="cancel" name="cancel" value="{#cancel}" onclick="tinyMCEPopup.close();" />
+	</div>
+</form>
+
+</body>
+</html>

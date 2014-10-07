@@ -102,6 +102,7 @@ router.get("/getAllUsers", function (req, res) {
 
 module.exports = router;
 
+//Funtion to redirect user on login error
 function redirectLogin(req, res, errMsg){
 	wikiModel.getWikiHomepage(function executeSql(sqlErr, rows) {			
 		if (sqlErr) {
@@ -124,6 +125,7 @@ function redirectLogin(req, res, errMsg){
 	});  
 }
 
+//Function to find user and authenticate his/her credentials
 function findAndAuthenticate(req, res, userInfo){
 	//Check if user account is disabled
 	if(userInfo.userAccountControl != config.NORMAL_ACCOUNT){

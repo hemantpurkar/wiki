@@ -56,12 +56,17 @@
                 	%>                	
                 	<a href="<%= edit_url%>" title="Edit wiki page">Edit</a>
                 	 <% if (session_user.role == 'admin'){
-            		 %>  |
-                	<a href="<%= export_url%>" title="Export wiki page" target="_blank">PDF</a> 
-						|
-					<a href="#" title="Export to Word" onClick="return exportToWord();">Word</a> 
-						|	
-                	<a href="<%= delete_url%>" title="Export wiki page" onClick="return confirm('Confirm delete?')">Delete</a> 
+            		 %>	|  
+            		 <ul class="nav pull-right padding-left-3px">
+	            		 <li class="dropdown">	            		  
+	            		  	<a class="dropdown-toggle" data-toggle="dropdown" href="#" title="Tools">Tools<b class="caret"></b></a>
+	            			<ul class="dropdown-menu">	            			
+								<li><a href="<%= export_url%>" title="Export wiki page" target="_blank">Export to PDF</a></li>
+								<li><a href="#" title="Export to Word" onClick="return exportToWord();">Export to Word</a></li>
+								<li><a href="<%= delete_url%>" title="Export wiki page" onClick="return confirm('Confirm delete?')">Delete</a></li>
+							</ul>
+						</li>	
+					 </ul>            		            			
                 	<% }}	%>
                 </li>    
             </ul>

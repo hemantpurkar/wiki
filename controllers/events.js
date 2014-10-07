@@ -7,15 +7,7 @@ var log = require('../lib/logger');
 var apptitle = 'Wiki';
 var fs = require('fs-extra');
 
-/*var logAndRespond = function logAndRespond(err,res,status){
-    console.error(err);
-    res.statusCode = ('undefined' === typeof status ? 500 : status);
-    res.send({
-        result: 'error',
-        err:    err.code
-    });
-};*/
-
+//Get all calendar events to display on daywise calendar page
 router.get('/calendar', function(req, res) {
 	if (req.session.loggedIn) {
         res.render('event/events', {
@@ -30,6 +22,7 @@ router.get('/calendar', function(req, res) {
     }
 });
 
+//Create an event and display on calendar page
 router.post('/event', function(req, res) {
 	var data = req.body;
 	var mode = data["!nativeeditor_status"];
@@ -39,14 +32,12 @@ router.post('/event', function(req, res) {
 	delete data.id;
 	delete data.gr_id;
 	delete data["!nativeeditor_status"];
-	if (req.session.loggedIn) {
-		 if (mode == "updated"){
-			    //console.log("Data updated " + JSON.stringify(data, null));
+	if (req.session.loggedIn) {		
+		 if (mode == "updated"){ //If updating existing event
 			    var params = [data.text, data.start_date, data.end_date, req.session.user.id,  data.type, data.event_id];
 			    eventModel.updateEvent(params, function executeSql(sqlErr, rows) {
 					if (sqlErr) {
 						mode = "error";
-						//logAndRespond(sqlErr, res);
 						log.logger.error(sqlErr);	
 						return;
 					} else {
@@ -56,13 +47,11 @@ router.post('/event', function(req, res) {
 					}
 				});	
 		    }
-		    else if (mode == "inserted"){
-			    //console.log("Data inserted" + JSON.stringify(data, null));
+		    else if (mode == "inserted"){	//If adding new event
 			    var params = [data.start_date, data.end_date, data.text, data.type, req.session.user.id];
 			    eventModel.createEvent(params, function executeSql(sqlErr, rows) {
 					if (sqlErr) {
 						mode = "error";
-						//logAndRespond(sqlErr, res);
 						log.logger.error(sqlErr);	
 						return;
 					} else {
@@ -72,13 +61,11 @@ router.post('/event', function(req, res) {
 					}
 				});			   
 		    }
-		    else if (mode == "deleted"){
-			    //console.log("Data deleted  " + JSON.stringify(data, null));
+		    else if (mode == "deleted"){ //If deleting existing event
 			    var params = [data.event_id];
 			    eventModel.deleteEvent(params, function executeSql(sqlErr, rows) {
 					if (sqlErr) {
 						mode = "error";
-						//logAndRespond(sqlErr, res);
 						log.logger.error(sqlErr);	
 						return;
 					} else {
@@ -94,15 +81,16 @@ router.post('/event', function(req, res) {
 	}
 });
 
+//Get event information
 router.get('/getEvent', function(req, res) {
 	if (req.session.loggedIn) {	
 		waterfall([
-		    function(callback){       
+		    function(callback){
+		    	//get admin user details 
 		    	userModel.getAdminUser(function executeSql(sqlErr1, rows1) {
 					if (sqlErr1) {
-						//logAndRespond(sqlErr1, res);
 						log.logger.error(sqlErr1);	
-						callback(sqlErr1, '');
+						callback(sqlErr1, ''); 
 					} else {	
 						callback(null, rows1);						
 					}
@@ -123,7 +111,6 @@ router.get('/getEvent', function(req, res) {
 				eventModel.getEvent(params, function executeSql(sqlErr2, rows2) {
 					if (sqlErr2) {
 						mode = "error";
-						//logAndRespond(sqlErr2, res);
 						log.logger.error(sqlErr2);	
 						callback(sqlErr2, '');
 					} else {

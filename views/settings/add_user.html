@@ -21,14 +21,12 @@
                 <li class="active"><%= page_message %> User</li>
             </ul>
         </div>
-    </div>
-    <div> <%- message %></div>
-             
+    </div>       
     <div id="regForm">
-        <form action="<%= action %>" method="POST" class="form-horizontal" id="frm_wiki">			
+        <form action="<%= action %>" method="POST" class="form-horizontal" id="frm_wiki">	
+        	<%if(message != "") { %> <div class="alert alert-error"><%= message %></div> <%} %>	
             <div class="control-group">
                 <label for="email_input" class="control-label" for="email_input">Email</label>
-
                 <div class="controls">
                     <input type="email" id="email_input" name="email" oninvalid="setCustomValidity('Please enter a valid email address!')" onchange="try{setCustomValidity('')}catch(e){}" required="" placeholder="Enter Email">
                 </div>
