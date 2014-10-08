@@ -143,10 +143,10 @@ var extension;
 
 $('input[type=file]').change(function(){
     var file = this.files[0];
-    /*name = file.name;
+    name = file.name;
     size = file.size;
     type = file.type;
-	extension  = name.substr(-4).toLowerCase();*/
+	/*extension  = name.substr(-4).toLowerCase();*/
 	var ext = name.split(".");
 
 	if( validExtensions.indexOf(ext[1]) < 0 ){
