@@ -260,6 +260,21 @@ var getAllParentWiki = function(callback) {
 var getWikiperType = function(params, callback) {
 	var qry = 	"SELECT w.wiki_id,w.wiki_title,w.wiki_type, wt.wiki_type AS type FROM wiki w ";
 		qry += 	"LEFT JOIN wiki_type wt ON w.wiki_type = wt.type_id ";
+		qry += 	"WHERE w.wiki_type IN(?) AND w.wiki_active=1 AND w.home_page = 0 ORDER BY w.wiki_id DESC";
+
+	connection.query(qry, params, function(err, rows, fields) {
+		if (err) {
+			console.log("Error in getWikiperType query ", err);
+			callback(err);
+		} else {
+			callback('', rows);
+		}
+	})
+}
+
+var getWikiperType_withHome = function(params, callback) {
+	var qry = 	"SELECT w.wiki_id,w.wiki_title,w.wiki_type, wt.wiki_type AS type FROM wiki w ";
+		qry += 	"LEFT JOIN wiki_type wt ON w.wiki_type = wt.type_id ";
 		qry += 	"WHERE w.wiki_type IN(?) and w.wiki_active=1 order by w.wiki_id desc";
 
 	connection.query(qry, params, function(err, rows, fields) {
@@ -307,3 +322,4 @@ exports.deleteWikiPage = deleteWikiPage;
 exports.getAllParentWiki = getAllParentWiki; 
 exports.getWikiperType = getWikiperType; 
 exports.getUpdateWikiTypes = getUpdateWikiTypes; 
+exports.getWikiperType_withHome = getWikiperType_withHome; 

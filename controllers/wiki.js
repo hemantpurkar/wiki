@@ -912,8 +912,15 @@ router.get('/getTree', function(req, res) {
 					wikiTypeArr.push(results[i]['type_id']); 
 				}	
 								
-				params = [wikiTypeArr];			
-				wikiModel.getWikiperType(params, function(err, childtypes){							
+				params = [wikiTypeArr];		
+				
+				if(req.session.user.role == 'admin'){
+					method = wikiModel.getWikiperType_withHome;				
+				}else{
+					method = wikiModel.getWikiperType;
+				}
+				
+				method(params, function(err, childtypes){								
 					if (err) {
 						return res.send(500, "getWikiperType QUERY ERROR");						
 					}
