@@ -231,7 +231,7 @@ var deleteWikiPage = function(params, callback) {
 var getWikiHomepage = function(callback) {
 	var qry = 'SELECT wiki.wiki_id, wiki.wiki_title, wiki.wiki_content, wiki.wiki_type, DATE_FORMAT( updated_date,  "%d %b %Y, %h:%i %p" ) AS updated_date';
 		qry += ' FROM wiki AS wiki';
-		qry += ' WHERE wiki.home_page =1';	
+		qry += ' WHERE wiki.home_page =1 AND wiki.wiki_active = 1';	
 		qry += ' ORDER BY wiki.updated_date DESC';	
 		qry += ' LIMIT 0 , 1';	
 	connection.query(qry, function(err, rows, fields) {
